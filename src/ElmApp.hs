@@ -19,6 +19,7 @@ elmPage e = do
         head $ do
              elmImport e
         body $ do
+             h1 "Unable to mount elm module. Please check console output"
              elmMount
 
 elmImport :: ElmApp -> Html

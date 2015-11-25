@@ -19,8 +19,8 @@ elmPage e = do
         head $ do
              elmImport e
         body $ do
-             h1 "Unable to mount elm module. Please check console output"
              elmMount
+             h1 "Unable to mount elm module. Please check console output"
 
 elmImport :: ElmApp -> Html
 elmImport  (ElmApp l) = script "" ! src  (stringValue $ l ++ "/elm.js" ) ! type_ "text/javascript"

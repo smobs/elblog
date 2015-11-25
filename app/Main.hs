@@ -13,18 +13,19 @@ main = run 8081 app
 app :: Application
 app = serve siteAPI server
 
+
 type Blog = String
 
 type BlogApi = "api" :> "blog" :> Get '[JSON] Blog
 
 type HomeApi = Get '[HTML] ElmApp
 
-type SiteApi = HomeApi :<|> BlogApi :<|> "elm" :> Raw
+type SiteApi = HomeApi :<|> BlogApi :<|> "static" :> Raw
 
-server :: Server SiteApi
-server = return (ElmApp "elm")
+server ::  Server SiteApi
+server = return (ElmApp "static/dist")
          :<|> return "Hello world"
-         :<|>  serveDirectory "elm"
+         :<|>  serveDirectory "static"
 
 
 siteAPI :: Proxy SiteApi

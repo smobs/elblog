@@ -2,13 +2,18 @@
 {-# LANGUAGE TypeOperators #-}
 module Main where
 
+import           Data.Maybe               (fromMaybe)
 import           ElmApp
 import           Network.Wai
 import           Network.Wai.Handler.Warp
 import           Servant
 import           Servant.HTML.Blaze
+import           System.Environment
+
 main :: IO ()
-main = run 8081 app
+main = do
+  p <- port
+  run p app
 
 app :: Application
 app = serve siteAPI server
@@ -30,3 +35,9 @@ server = return (ElmApp "static/dist")
 
 siteAPI :: Proxy SiteApi
 siteAPI = Proxy
+
+port :: IO Int
+port = do
+  env <- getEnvironment
+  let port = fromMaybe "8080" $ lookup "PORT" env
+  return (read port)

@@ -3,6 +3,7 @@ module Blog where
 import Blog.Entry as Entry
 import Html exposing(..)
 import Html.Events exposing(onClick)
+import Html.Attributes exposing(style, class)
 import List
 import Signal
 
@@ -27,7 +28,12 @@ update a m =
              
 view : Signal.Address Action -> Model -> Html
 view adr m = div [] [ blogEntries adr m.blogs
-                , button [onClick adr (NewBlog "New" "Stuff")] [text "New blog"]
+                    , button
+                      [ onClick adr (NewBlog "New" "Stuff")
+                      , style newBlogButtonStyle
+                      , class "pure-button"
+                      ]
+                      [text "New blog"]
                     ]
 
 
@@ -40,3 +46,6 @@ blogEntries addr m = m
 
 listItem : Html -> Html
 listItem h = li [] [h]
+
+newBlogButtonStyle : List (String, String)
+newBlogButtonStyle = [("background-color", "green")]

@@ -17,7 +17,7 @@ update ac m =
 view : Signal.Address Action -> Model -> Html
 view addr {title, body, open} = div [onClick addr Toggle] 
                                 (if open
-                                 then [ text title
+                                 then [ h3 [] [text title]
                                      , br [] []
                                      , text body]
                            else [text title])

@@ -33,7 +33,7 @@ update a (Model {page})  = (Model {page = updateBody a page}, Effects.none)
 
 view : Signal.Address Action ->  Model -> Html
 view a (Model {page}) = body [] [ (viewHeader a)
-                               , (viewBody a page)
+                                 , (viewBody a page)
                               ]
 
 viewHeader : Signal.Address Action -> Html

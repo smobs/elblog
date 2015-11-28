@@ -48,4 +48,4 @@ listItem : Html -> Html
 listItem h = li [] [h]
 
 newBlogButtonStyle : List (String, String)
-newBlogButtonStyle = [("background-color", "green")]
+newBlogButtonStyle = [("background-color", "blue")]

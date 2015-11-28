@@ -33,7 +33,7 @@ view adr m = div [] [ blogEntries adr m.blogs
                       , style newBlogButtonStyle
                       , class "pure-button"
                       ]
-                      [text "New blog"]
+                      [text "New"]
                     ]
 
 

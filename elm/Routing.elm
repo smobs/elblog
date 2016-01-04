@@ -1,6 +1,6 @@
 module Routing where
 
-import Router exposing ((:->), Route)
+
 import Html exposing (..)
 
 import Home

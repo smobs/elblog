@@ -21,7 +21,7 @@ update a m =
   let {nextID, blogs} = m in
   case a of
     (NewBlog title content) -> {nextID = nextID + 1, blogs = (nextID, Entry.init title content) :: blogs}
-    (EntryAction id ac) -> {m | blogs <- blogs 
+    (EntryAction id ac) -> {m | blogs = blogs 
                               |> List.map (\(i, m) -> 
                                 (i, if i == id then Entry.update ac m else m))
                            }

@@ -3,17 +3,16 @@ import StartApp
 import Task
 import Effects exposing (Never)
 import Html exposing (..)
-import History
-import Routing exposing(..)
-import Header
+import Blog
 
-type Model = Model {page : Page}
+type alias Model = Blog.Model
 
+type alias Action = Blog.Action
 
 app = StartApp.start
       { init = init
       , update = update
-      , inputs = [urlNavigation]
+      , inputs = []
       , view = view
       }
 
@@ -22,24 +21,13 @@ main = app.html
 port tasks : Signal (Task.Task Never ())
 port tasks = app.tasks
 
-init = ( Model
-         {
-           page = defaultPage
-         } 
+init = ( Blog.init
        , Effects.none)
 
 update : Action -> Model -> (Model, Effects.Effects Action)
-update a (Model {page})  = (Model {page = updateBody a page}, Effects.none)
+update  a m = (Blog.update a m, Effects.none) 
 
 view : Signal.Address Action ->  Model -> Html
-view a (Model {page}) = body [] [ (viewHeader a)
-                                 , (viewBody a page)
-                              ]
+view = Blog.view
 
-viewHeader : Signal.Address Action -> Html
-viewHeader a  = Header.view 
-                (Signal.forwardTo a Navigate)
-                navRoutes
 
-urlNavigation : Signal Action
-urlNavigation = Signal.map (\s -> Navigate (routes s)) History.hash

@@ -8,5 +8,6 @@
     "gulp": "~3.9.0",
     "elm": "~0.16.0"
   },
-  "author": "smobs"
+  "author": "smobs",
+  "engines" : { "node" : "5.4.0" }
 }

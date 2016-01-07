@@ -11,3 +11,5 @@ gulp.task('elm', ['elm-init'], function () {
 });
 
 gulp.task('default', ['elm'])
+
+gulp.task('heroku:prod', ['default']);

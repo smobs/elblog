@@ -10,6 +10,6 @@ gulp.task('elm', ['elm-init'], function () {
     .pipe(gulp.dest('dist/'));
 });
 
-gulp.task('default', ['elm'])
+gulp.task('default')
 
 gulp.task('heroku:prod', ['default']);

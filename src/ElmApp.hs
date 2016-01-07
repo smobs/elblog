@@ -23,7 +23,7 @@ elmPage e = do
              elmMount
 
 elmImport :: ElmApp -> Html
-elmImport  (ElmApp l) = script "" ! src  (stringValue $ l ++ "/elm.js" ) ! type_ "text/javascript"
+elmImport  (ElmApp l) = script "" ! src  (stringValue $ l ++ "/Main.js" ) ! type_ "text/javascript"
 
 elmCss :: Html
 elmCss = link ! rel "stylesheet" ! href "static/css/pure.css"

@@ -1,0 +1,12 @@
+{
+  "name": "elblog",
+  "version": "0.0.0",
+  "description": "Front end of my blog",
+  "dependencies": {},
+  "devDependencies": {
+    "gulp-elm": "~0.2.0",
+    "gulp": "~3.9.0",
+    "elm": "~0.16.0"
+  },
+  "author": "smobs"
+}

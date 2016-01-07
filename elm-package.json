@@ -4,7 +4,7 @@
   "repository": "https://github.com/smobs/elblog.git",
   "license": "BSD3",
   "source-directories": [
-    "elm"
+    "static/elm"
   ],
   "exposed-modules": [],
   "dependencies": {

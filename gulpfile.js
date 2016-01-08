@@ -1,15 +1,26 @@
 
 var gulp = require('gulp');
 var elm = require('gulp-elm');
+var purescript = require('gulp-purescript');
 
-gulp.task('elm-init', elm.init);
+var sources = [
+  "static/purescript/**/*.purs",
+  "bower_components/purescript-*/**/*.purs"
+];
 
-gulp.task('elm', ['elm-init'], function () {
-  return gulp.src('static/elm/Main.elm')
-    .pipe(elm())
-    .pipe(gulp.dest('static/dist/'));
+var foreigns = [
+  "static/purescript/**/*.js",
+  "bower_components/purescript-*/**/*.js"
+];
+
+gulp.task('make', function () {
+  return purescript.psc({src: sources, ffi: foreigns});
 });
 
-gulp.task('default', ['elm'])
+gulp.task('bundle', ['make'], function (){
+  return purescript.pscBundle({src: "output/**/*.js", output: "static/dist/Main.js"});
+})
+
+gulp.task('default', ['bundle'])
 
 gulp.task('heroku:prod', ['default']);

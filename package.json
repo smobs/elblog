@@ -6,8 +6,12 @@
   "devDependencies": {
     "gulp-elm": "~0.2.0",
     "gulp": "~3.9.0",
-    "elm": "~0.16.0"
+    "elm": "~0.16.0",
+    "gulp-purescript": "~0.8.0",
+    "purescript": "~0.7.6"
   },
   "author": "smobs",
-  "engines" : { "node" : "5.4.0" }
+  "engines": {
+    "node": "5.4.0"
+  }
 }

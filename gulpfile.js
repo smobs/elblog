@@ -1,6 +1,5 @@
 
 var gulp = require('gulp');
-var elm = require('gulp-elm');
 var purescript = require('gulp-purescript');
 
 var sources = [

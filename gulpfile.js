@@ -3,13 +3,13 @@ var gulp = require('gulp');
 var purescript = require('gulp-purescript');
 
 var sources = [
-  "static/purescript/**/*.purs",
-  "bower_components/purescript-*/**/*.purs"
+  "static/purescript/src/**/*.purs",
+  "bower_components/purescript-*/src/**/*.purs"
 ];
 
 var foreigns = [
-  "static/purescript/**/*.js",
-  "bower_components/purescript-*/**/*.js"
+  "static/purescript/src/**/*.js",
+  "bower_components/purescript-*/src/**/*.js"
 ];
 
 gulp.task('make', function () {

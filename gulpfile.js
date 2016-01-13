@@ -19,7 +19,12 @@ gulp.task('make', function () {
 });
 
 gulp.task('psc-bundle', ['make'], function (){
-  return purescript.pscBundle({src: "output/**/*.js", output: pscBundle});
+  return purescript.pscBundle({
+    src: "output/**/*.js",
+    output: pscBundle,
+    module: "Main",
+    main: "Main"
+  });
 });
 
 gulp.task('bundle', ['psc-bundle'], function (){

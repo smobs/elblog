@@ -12,17 +12,15 @@ data PSApp = PSApp FilePath
 instance ToMarkup PSApp where
     toMarkup  = psPage
 
-
-
 psPage :: PSApp -> Html
 psPage e = do
          head $ do
-              elmCss
+              psCss
          body $ do
-              elmImport e
+              psImport e
 
-elmImport :: PSApp -> Html
-elmImport  (PSApp l) = script "" ! src  (stringValue $ l ++ "/bundle.js" ) ! type_ "text/javascript"
+psImport :: PSApp -> Html
+psImport  (PSApp l) = script "" ! src  (stringValue $ l ++ "/bundle.js" ) ! type_ "text/javascript"
 
-elmCss :: Html
-elmCss = link ! rel "stylesheet" ! href "static/css/pure.css"
+psCss :: Html
+psCss = link ! rel "stylesheet" ! href "static/css/pure.css"

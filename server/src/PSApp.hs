@@ -18,15 +18,11 @@ psPage :: PSApp -> Html
 psPage e = do
          head $ do
               elmCss
-              elmImport e
          body $ do
-              elmMount
+              elmImport e
 
 elmImport :: PSApp -> Html
 elmImport  (PSApp l) = script "" ! src  (stringValue $ l ++ "/bundle.js" ) ! type_ "text/javascript"
 
 elmCss :: Html
 elmCss = link ! rel "stylesheet" ! href "static/css/pure.css"
-
-elmMount :: Html
-elmMount = script "PS.Main.main()" ! type_ "text/javascript"

@@ -14,6 +14,6 @@ import Component.Blog
 
 main :: Eff (HalogenEffects ()) Unit
 main = runAff throwException (const (pure unit)) do
-  app <- runUI blog initialBlog
+  app <- runUI blog (installedState initialBlog)
   onLoad $ appendToBody app.node
 

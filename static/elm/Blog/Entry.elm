@@ -12,7 +12,7 @@ type Action = Toggle
 update : Action -> Model -> Model
 update ac m =
   case ac of
-    Toggle -> {m | open <- not m.open}
+    Toggle -> {m | open = not m.open}
 
 view : Signal.Address Action -> Model -> Html
 view addr {title, body, open} = div [onClick addr Toggle] 

@@ -1,5 +1,5 @@
 flags: {}
 packages:
-- '.'
+- 'server'
 extra-deps: []
 resolver: nightly-2015-11-22

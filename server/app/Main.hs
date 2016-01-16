@@ -3,9 +3,9 @@
 module Main where
 
 import           Data.Maybe               (fromMaybe)
-import           ElmApp
 import           Network.Wai
 import           Network.Wai.Handler.Warp
+import           PSApp
 import           Servant
 import           Servant.HTML.Blaze
 import           System.Environment
@@ -23,12 +23,12 @@ type Blog = String
 
 type BlogApi = "api" :> "blog" :> Get '[JSON] Blog
 
-type HomeApi = Get '[HTML] ElmApp
+type HomeApi = Get '[HTML] PSApp
 
 type SiteApi = HomeApi :<|> BlogApi :<|> "static" :> Raw
 
 server ::  Server SiteApi
-server = return (ElmApp "static/dist")
+server = return (PSApp "static/dist")
          :<|> return "Hello world"
          :<|>  serveDirectory "static"
 

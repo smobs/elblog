@@ -9,7 +9,7 @@ import Model
 
 type State = Article
 
-data Query a = Null a
+data Query a = Toggle a
 
 article :: forall g. (Functor g) => Component State Query g
 article = component render eval
@@ -17,10 +17,17 @@ article = component render eval
 
   render :: State -> ComponentHTML Query
   render state =
+    let title = H.h2 [E.onClick (E.input_ Toggle)] [H.text state.title] in
     H.div_
-      [ H.text state
-      ]
+      if state.visible
+      then
+        [ title
+        , H.text state.contents
+        ]
+      else
+         [title]
 
   eval :: Natural Query (ComponentDSL State Query g)
-  eval (Null next) = do
+  eval (Toggle next) = do
+    modify (\s -> s {visible = not s.visible})
     pure next

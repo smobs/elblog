@@ -4,14 +4,17 @@ import Prelude
 import Halogen
 import qualified Halogen.HTML.Indexed as H
 import qualified Halogen.HTML.Events.Indexed as E
+import Control.Monad.Aff (Aff())
 
+import Network.HTTP.Affjax (AJAX())
 import Model
 
 type State = Article
 
 data Query a = Toggle a
+type ArticleEffects eff = HalogenEffects (ajax :: AJAX | eff)
 
-article :: forall g. (Functor g) => Component State Query g
+article :: forall eff. Component State Query (Aff (ArticleEffects eff))
 article = component render eval
   where
 
@@ -27,7 +30,11 @@ article = component render eval
       else
          [title]
 
-  eval :: Natural Query (ComponentDSL State Query g)
+  eval ::  Natural Query (ComponentDSL State Query (Aff (ArticleEffects eff)))
   eval (Toggle next) = do
     modify (\s -> s {visible = not s.visible})
     pure next
+
+
+
+

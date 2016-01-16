@@ -12,6 +12,7 @@ import qualified Halogen.HTML.Events.Indexed as E
 import Model
 import Component.Article (article)
 import qualified Component.Article as Article
+import Control.Monad.Aff (Aff())
 
 type State = Blog
 -- | The state of the component
@@ -29,12 +30,12 @@ type FQuery = Coproduct Query (ChildF ArticleSlot Article.Query)
 data Query a =
   GetState (State -> a)
 
--- | The component definition
-blog :: forall g. (Functor g) => Component (FState g) FQuery g
+-- | The component definition9
+blog :: forall eff. Component (FState (Aff(Article.ArticleEffects eff))) FQuery (Aff(Article.ArticleEffects eff))
 blog = parentComponent render eval
   where
 
-  render :: State -> ParentHTML Article Query Article.Query g ArticleSlot
+  render :: State -> ParentHTML Article Query Article.Query (Aff(Article.ArticleEffects eff)) ArticleSlot
   render state =
     H.div_
       [ H.h1_
@@ -43,11 +44,11 @@ blog = parentComponent render eval
         (map renderArticle state.articles)
       ]
 
-  eval :: Natural Query (ParentDSL State Article.State Query Article.Query g ArticleSlot)
+  eval :: Natural Query (ParentDSL State Article.State Query Article.Query (Aff(Article.ArticleEffects eff)) ArticleSlot)
   eval (GetState continue) = do
     value <- get
     pure (continue value)
 
-  renderArticle :: ArticleId -> ParentHTML Article Query Article.Query g ArticleSlot
+  renderArticle :: ArticleId -> ParentHTML Article Query Article.Query (Aff(Article.ArticleEffects eff)) ArticleSlot
   renderArticle articleId = H.slot (ArticleSlot articleId) \_ -> {component: article, initialState: initialArticle articleId}  
 

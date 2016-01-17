@@ -9,10 +9,12 @@ import Control.Plus (Plus)
 import Halogen
 import Halogen.Util (appendToBody, onLoad)
 
+import Network.HTTP.Affjax (AJAX())
+
 import Model
 import Component.Blog
 
-main :: Eff (HalogenEffects ()) Unit
+main :: Eff (HalogenEffects (ajax :: AJAX)) Unit
 main = runAff throwException (const (pure unit)) do
   app <- runUI blog (installedState initialBlog)
   onLoad $ appendToBody app.node

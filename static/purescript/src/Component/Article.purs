@@ -60,8 +60,4 @@ getBlog id =
       contents <- readProp "content" res.response
       return {title : title, contents: contents}) of
              Right c -> c 
-             Left _ -> {title : "", contents : ""}
-    
-
-
-
+             Left e -> {title : "Invalid blog", contents : show e}

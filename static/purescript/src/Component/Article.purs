@@ -6,9 +6,12 @@ import qualified Halogen.HTML.Indexed as H
 import qualified Halogen.HTML.Events.Indexed as E
 import qualified Halogen.HTML.Properties.Indexed as P
 import Control.Monad.Aff (Aff())
-
+import Data.Either (Either(..))
 import Network.HTTP.Affjax (AJAX())
 import qualified Network.HTTP.Affjax as Ajax
+
+import Data.Foreign
+import Data.Foreign.Class
 
 import Model
 
@@ -18,6 +21,7 @@ data Query a = Toggle a
              | Load Int a
 
 type ArticleEffects eff = HalogenEffects (ajax :: AJAX | eff)
+data ArticleContents = ArticleContents {title :: String, contents :: String}
 
 article :: forall eff. Component State Query (Aff (ArticleEffects eff))
 article = component render eval
@@ -43,15 +47,21 @@ article = component render eval
     pure next
   eval (Load id next) = do
     c <- liftAff' $ getBlog id
-    modify (\s -> s {contents = c})
+    modify (\s -> s {contents = c.contents, title = c.title})
     pure next
 
-getBlog :: forall eff. Int -> Aff (ajax :: AJAX | eff) String
+getBlog :: forall eff. Int -> Aff (ajax :: AJAX | eff) {title :: String, contents :: String}
 getBlog id =
   let url = "api/blog/" ++ show id in
   do
     res <- Ajax.get url
-    return res.response
+    return case (do
+      title <- readProp "title" res.response
+      contents <- readProp "content" res.response
+      return {title : title, contents: contents}) of
+             Right c -> c 
+             Left _ -> {title : "", contents : ""}
+    
 
 
 

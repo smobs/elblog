@@ -5,7 +5,7 @@ Code for my WIP personal [site](tobysmyth.uk).
 
 Server written in Haskell using Servant.
 
-Front end using Halogen and purescript.
+Front end written in Purescript using Halogen,
 
 Technology and function subject to change at any time.
 

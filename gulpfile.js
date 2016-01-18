@@ -1,7 +1,9 @@
 
+var bower = require('gulp-bower');
 var gulp = require('gulp');
 var purescript = require('gulp-purescript');
 var webpack = require('webpack-stream');
+
 var sources = [
   "static/purescript/src/**/*.purs",
   "bower_components/purescript-*/src/**/*.purs"
@@ -16,7 +18,11 @@ var pscBundle = "static/dist/psc-bundle.js";
 
 var cssSources = "static/css/**"
 
-gulp.task('make', function () {
+gulp.task('bower', function() {
+  return bower();
+});
+
+gulp.task('make', ['bower'], function () {
   return purescript.psc({src: sources, ffi: foreigns});
 });
 

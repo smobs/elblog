@@ -1,22 +1,21 @@
-= Elblog
+# Elblog
 
-== Build
+## Build
 
-=== Prerequisites
+### Prerequisites
 * [Stack] (http://docs.haskellstack.org/en/stable/README.html)
 * [npm] (https://nodejs.org/en/)
 
-=== Building
+### Building
 
-* Front end
-** `npm install` to install build tools
-** `bower install` to install purescript modules
-** `gulp` to build project.
+#### Front end
+* `npm install` to install build tools
+* `bower install` to install purescript modules
+* `gulp` to build project.
 
-
-* Server
-** `stack build` to build the server
-** `stack exec elblog-server` to start the server.
+##### Server
+* `stack build` to build the server
+* `stack exec elblog-server` to start the server.
 
 Runs on port specified by `$PORT`, defaulting to 8080
 

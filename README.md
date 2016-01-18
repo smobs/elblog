@@ -1,4 +1,15 @@
 # Elblog
+## About
+
+Code for my WIP personal [site](tobysmyth.uk).
+
+Server written in Haskell using Servant.
+
+Front end using Halogen and purescript.
+
+Technology and function subject to change at any time.
+
+Code quality: Dubious
 
 ## Build
 

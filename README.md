@@ -1,7 +1,7 @@
 # Elblog
 ## About
 
-Code for my WIP personal [site](tobysmyth.uk).
+Code for my WIP personal [site](http://tobysmyth.uk).
 
 Server written in Haskell using Servant.
 

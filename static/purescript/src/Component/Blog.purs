@@ -47,7 +47,7 @@ blog = parentComponent render eval
   render state =
     H.div [P.initializer \_ -> action Load]
       [ H.h1_
-          [ H.text "Awesome Blog" ]
+          [ H.text "Toby's Blog" ]
       , H.div_
         (map renderArticle state.articles)
       ]

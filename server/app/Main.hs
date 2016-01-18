@@ -34,10 +34,10 @@ type HomeApi = Get '[HTML] PSApp
 type SiteApi = HomeApi :<|> BlogApi :<|> "static" :> Raw
 
 server ::  Server SiteApi
-server = return (PSApp "static/dist")
+server = return (PSApp "static")
          :<|> (return [1,2,3]
          :<|> blogHandler)
-         :<|> serveDirectory "static"
+         :<|> serveDirectory "static/dist/"
 
 blogHandler id = let i = show id
                  in return $ Blog ("Blog " ++ i) ("Content " ++ i)

@@ -5,11 +5,9 @@ Code for my WIP personal [site](tobysmyth.uk).
 
 Server written in Haskell using Servant.
 
-Front end written in Purescript using Halogen,
+Front end written in Purescript using Halogen.
 
 Technology and function subject to change at any time.
-
-Code quality: Dubious
 
 ## Build
 
@@ -20,12 +18,12 @@ Code quality: Dubious
 ### Building
 
 #### Front end
-* `npm install` to install build tools
-* `gulp` to build project.
+* `npm install` to install the build tools.
+* `gulp` to build the project.
 
 ##### Server
-* `stack build` to build the server
+* `stack build` to build the server.
 * `stack exec elblog-server` to start the server.
 
-Runs on port specified by `$PORT`, defaulting to 8080
+Runs on port specified by `$PORT`, defaulting to 8080.
 

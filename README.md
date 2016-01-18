@@ -10,7 +10,6 @@
 
 #### Front end
 * `npm install` to install build tools
-* `bower install` to install purescript modules
 * `gulp` to build project.
 
 ##### Server

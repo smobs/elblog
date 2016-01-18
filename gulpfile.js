@@ -14,6 +14,8 @@ var foreigns = [
 
 var pscBundle = "static/dist/psc-bundle.js";
 
+var cssSources = "static/css/**"
+
 gulp.task('make', function () {
   return purescript.psc({src: sources, ffi: foreigns});
 });
@@ -36,6 +38,11 @@ gulp.task('bundle', ['psc-bundle'], function (){
     .pipe(gulp.dest("static/dist"));
 });
 
-gulp.task('default', ['bundle'])
+gulp.task('css', function(){
+  return gulp.src(cssSources)
+    .pipe(gulp.dest("static/dist/css"));
+});
+
+gulp.task('default', ['css','bundle'])
 
 gulp.task('heroku:prod', ['default']);

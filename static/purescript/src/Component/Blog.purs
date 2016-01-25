@@ -4,6 +4,7 @@ import Prelude
 
 import Data.Generic (Generic, gEq, gCompare)
 import Data.Functor.Coproduct (Coproduct())
+import Data.Traversable
 
 import Halogen
 import qualified Halogen.HTML.Indexed as H
@@ -21,54 +22,54 @@ import Data.Foreign
 import Data.Foreign.Class
 import Data.Either (Either(..))
 
-
-type State = Blog
--- | The state of the component
-type FState g = InstalledState Blog Article Query Article.Query g ArticleSlot
-
 newtype ArticleSlot = ArticleSlot ArticleId
 
 derive instance articleSlot :: Generic ArticleSlot
 instance eqArticleSlot :: Eq ArticleSlot where eq = gEq
 instance ordArticleSlot :: Ord ArticleSlot where compare = gCompare
 
-type FQuery = Coproduct Query (ChildF ArticleSlot Article.Query)
-
--- | The query algebra for the component
+type State = Blog
 data Query a =
   Load a
-    
+
+type FState g = InstalledState Blog Article Query Article.Query g ArticleSlot
+type FQuery = Coproduct Query (ChildF ArticleSlot Article.Query)
+
 -- | The component definition9
 blog :: forall eff. Component (FState (Aff(Article.ArticleEffects eff))) FQuery (Aff(Article.ArticleEffects eff))
 blog = parentComponent render eval
   where
-
-  render :: State -> ParentHTML Article Query Article.Query (Aff(Article.ArticleEffects eff)) ArticleSlot
-  render state =
-    H.div [P.initializer \_ -> action Load]
+    render :: State -> ParentHTML Article Query Article.Query (Aff(Article.ArticleEffects eff)) ArticleSlot
+    render state =
+      H.div [P.initializer \_ -> action Load]
       [ H.h1_
           [ H.text "Toby's Blog" ]
       , H.div_
         (map renderArticle state.articles)
       ]
 
-  eval :: Natural Query (ParentDSL State Article.State Query Article.Query (Aff(Article.ArticleEffects eff)) ArticleSlot)
-  eval (Load a) = do
-    ids <- liftH $ liftAff' getBlogIds
-    modify (\s -> s {articles = ids})
-    pure a
+    eval :: Natural Query (ParentDSL State Article.State Query Article.Query (Aff(Article.ArticleEffects eff)) ArticleSlot)
+    eval (Load a) = do
+      bs <-  liftH $ liftAff' getBlogs
+      let ids = map (\(Article b) -> {id: b.id, title: b.title, contents: b.contents}) bs
+      modify (\s -> s {articles = ids})
+      traverse (\(Article b) -> query (ArticleSlot b.id) (action (Article.Load {title: b.title, contents:b.contents}))) bs
+      pure a
     
 
-  renderArticle :: ArticleId -> ParentHTML Article Query Article.Query (Aff(Article.ArticleEffects eff)) ArticleSlot
-  renderArticle articleId = H.slot (ArticleSlot articleId) \_ -> {component: article, initialState: initialArticle articleId}
+    renderArticle :: {title :: String, contents :: String, id :: ArticleId} -> ParentHTML Article Query Article.Query (Aff(Article.ArticleEffects eff)) ArticleSlot
+    renderArticle ar = H.slot (ArticleSlot (ar.id))
+                            (\_ -> {component: article,
+                                   initialState: initialArticle ar.id ar.title ar.contents})
 
-getBlogIds :: forall eff. Aff (ajax :: AJAX | eff) (Array ArticleId)
-getBlogIds = 
-let url = "api/blogs" in
+getBlogs :: forall eff. Aff (ajax :: AJAX | eff) (Array Article)
+getBlogs = 
+  let url = "api/blogs" in
   do
     resp <- Ajax.get url
     return case
-      readJSON resp.response :: F (Array Int)
+      readJSON resp.response :: F (Array Article)
       of
         Right ids -> ids
-        Left _ -> []
+        Left err -> [Article {title: "ERROR", contents: show err, visible: true, id: -1}]
+

@@ -18,7 +18,7 @@ import Model
 type State = Article
 
 data Query a = Toggle a
-             | Load Int a
+             | Load {title :: String, contents :: String} a
 
 type ArticleEffects eff = HalogenEffects (ajax :: AJAX | eff)
 data ArticleContents = ArticleContents {title :: String, contents :: String}
@@ -28,9 +28,9 @@ article = component render eval
   where
 
   render :: State -> ComponentHTML Query
-  render state =
+  render (Article state) =
     let title = H.h2 [E.onClick (E.input_ Toggle)
-                     , P.initializer \_ -> action (Load state.id)]
+                     ]
                 [H.text state.title] in
     H.div_
       if state.visible
@@ -43,21 +43,8 @@ article = component render eval
 
   eval ::  Natural Query (ComponentDSL State Query (Aff (ArticleEffects eff)))
   eval (Toggle next) = do
-    modify (\s -> s {visible = not s.visible})
+    modify (\(Article s)-> Article (s {visible = not s.visible}))
     pure next
-  eval (Load id next) = do
-    c <- liftAff' $ getBlog id
-    modify (\s -> s {contents = c.contents, title = c.title})
+  eval (Load ar next) = do
+    modify (\(Article s) -> Article  (s {contents = ar.contents, title = ar.title}))
     pure next
-
-getBlog :: forall eff. Int -> Aff (ajax :: AJAX | eff) {title :: String, contents :: String}
-getBlog id =
-  let url = "api/blog/" ++ show id in
-  do
-    res <- Ajax.get url
-    return case (do
-      title <- readProp "title" res.response
-      contents <- readProp "content" res.response
-      return {title : title, contents: contents}) of
-             Right c -> c 
-             Left e -> {title : "Invalid blog", contents : show e}

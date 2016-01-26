@@ -14,6 +14,7 @@ import Model
 import Component.Article (article)
 import qualified Component.Article as Article
 import Control.Monad.Aff (Aff())
+import Control.Monad.Aff.Class
 import Network.HTTP.Affjax (AJAX())
 import qualified Network.HTTP.Affjax as Ajax
 
@@ -37,10 +38,10 @@ type FState g = InstalledState Blog Article Query Article.Query g ArticleSlot
 type FQuery = Coproduct Query (ChildF ArticleSlot Article.Query)
 
 -- | The component definition9
-blog :: forall eff. Component (FState (Aff(BlogEffects eff))) FQuery (Aff(BlogEffects eff))
+blog :: forall a eff. (Functor a, MonadAff (BlogEffects eff) a) =>  Component (FState a) FQuery a
 blog = parentComponent render eval
   where
-    render :: State -> ParentHTML Article Query Article.Query (Aff(BlogEffects eff)) ArticleSlot
+    render :: State -> ParentHTML Article Query Article.Query a ArticleSlot
     render state =
       H.div [P.initializer \_ -> action Load]
       [ H.h1_
@@ -49,7 +50,7 @@ blog = parentComponent render eval
         (map renderArticle state.articles)
       ]
 
-    eval :: Natural Query (ParentDSL State Article.State Query Article.Query (Aff(BlogEffects eff)) ArticleSlot)
+    eval :: Natural Query (ParentDSL State Article.State Query Article.Query a ArticleSlot)
     eval (Load a) = do
       bs <-  liftH $ liftAff' getBlogs
       let ids = map (\(Article b) -> {id: b.id, title: b.title, contents: b.contents}) bs
@@ -58,7 +59,7 @@ blog = parentComponent render eval
       pure a
     
 
-    renderArticle :: {title :: String, contents :: String, id :: ArticleId} -> ParentHTML Article Query Article.Query (Aff(BlogEffects eff)) ArticleSlot
+    renderArticle :: {title :: String, contents :: String, id :: ArticleId} -> ParentHTML Article Query Article.Query a ArticleSlot
     renderArticle ar = H.slot (ArticleSlot (ar.id))
                             (\_ -> {component: article,
                                    initialState: initialArticle ar.id ar.title ar.contents})

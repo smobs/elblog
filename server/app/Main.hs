@@ -22,12 +22,11 @@ main = do
 app :: Application
 app = serve siteAPI server
 
-data Blog = Blog {title :: String, content :: String} deriving (Generic, Eq, Show)
+data Blog = Blog {id :: Int, title :: String, content :: String} deriving (Generic, Eq, Show)
 
 instance ToJSON Blog
 
-type BlogApi = "api" :> "blogs" :> Get '[JSON] [Int]
-     :<|> "api" :> "blog" :> Capture "blogId"  Int :> Get '[JSON] Blog
+type BlogApi = "api" :> "blogs" :> Get '[JSON] [Blog]
 
 type HomeApi = Get '[HTML] PSApp
 
@@ -35,12 +34,14 @@ type SiteApi = HomeApi :<|> BlogApi :<|> "static" :> Raw
 
 server ::  Server SiteApi
 server = return (PSApp "static")
-         :<|> (return [1,2,3]
-         :<|> blogHandler)
+         :<|> blogHandler [1,2,3]
          :<|> serveDirectory "static/dist/"
 
-blogHandler id = let i = show id
-                 in return $ Blog ("Blog " ++ i) ("Content " ++ i)
+
+blogHandler ids = return $
+ map
+ (\i -> Blog i ("Blog " ++ show i) ("Content"))
+ ids
 
 siteAPI :: Proxy SiteApi
 siteAPI = Proxy

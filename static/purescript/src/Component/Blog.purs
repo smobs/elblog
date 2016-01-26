@@ -8,7 +8,6 @@ import Data.Traversable
 
 import Halogen
 import qualified Halogen.HTML.Indexed as H
-import qualified Halogen.HTML.Events.Indexed as E
 import qualified Halogen.HTML.Properties.Indexed as P
 
 import Model
@@ -28,6 +27,8 @@ derive instance articleSlot :: Generic ArticleSlot
 instance eqArticleSlot :: Eq ArticleSlot where eq = gEq
 instance ordArticleSlot :: Ord ArticleSlot where compare = gCompare
 
+type BlogEffects eff = HalogenEffects(ajax :: AJAX | eff)
+
 type State = Blog
 data Query a =
   Load a
@@ -36,10 +37,10 @@ type FState g = InstalledState Blog Article Query Article.Query g ArticleSlot
 type FQuery = Coproduct Query (ChildF ArticleSlot Article.Query)
 
 -- | The component definition9
-blog :: forall eff. Component (FState (Aff(Article.ArticleEffects eff))) FQuery (Aff(Article.ArticleEffects eff))
+blog :: forall eff. Component (FState (Aff(BlogEffects eff))) FQuery (Aff(BlogEffects eff))
 blog = parentComponent render eval
   where
-    render :: State -> ParentHTML Article Query Article.Query (Aff(Article.ArticleEffects eff)) ArticleSlot
+    render :: State -> ParentHTML Article Query Article.Query (Aff(BlogEffects eff)) ArticleSlot
     render state =
       H.div [P.initializer \_ -> action Load]
       [ H.h1_
@@ -48,7 +49,7 @@ blog = parentComponent render eval
         (map renderArticle state.articles)
       ]
 
-    eval :: Natural Query (ParentDSL State Article.State Query Article.Query (Aff(Article.ArticleEffects eff)) ArticleSlot)
+    eval :: Natural Query (ParentDSL State Article.State Query Article.Query (Aff(BlogEffects eff)) ArticleSlot)
     eval (Load a) = do
       bs <-  liftH $ liftAff' getBlogs
       let ids = map (\(Article b) -> {id: b.id, title: b.title, contents: b.contents}) bs
@@ -57,7 +58,7 @@ blog = parentComponent render eval
       pure a
     
 
-    renderArticle :: {title :: String, contents :: String, id :: ArticleId} -> ParentHTML Article Query Article.Query (Aff(Article.ArticleEffects eff)) ArticleSlot
+    renderArticle :: {title :: String, contents :: String, id :: ArticleId} -> ParentHTML Article Query Article.Query (Aff(BlogEffects eff)) ArticleSlot
     renderArticle ar = H.slot (ArticleSlot (ar.id))
                             (\_ -> {component: article,
                                    initialState: initialArticle ar.id ar.title ar.contents})

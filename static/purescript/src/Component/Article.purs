@@ -5,10 +5,6 @@ import Halogen
 import qualified Halogen.HTML.Indexed as H
 import qualified Halogen.HTML.Events.Indexed as E
 import qualified Halogen.HTML.Properties.Indexed as P
-import Control.Monad.Aff (Aff())
-import Data.Either (Either(..))
-import Network.HTTP.Affjax (AJAX())
-import qualified Network.HTTP.Affjax as Ajax
 
 import Data.Foreign
 import Data.Foreign.Class
@@ -20,10 +16,9 @@ type State = Article
 data Query a = Toggle a
              | Load {title :: String, contents :: String} a
 
-type ArticleEffects eff = HalogenEffects (ajax :: AJAX | eff)
 data ArticleContents = ArticleContents {title :: String, contents :: String}
 
-article :: forall eff. Component State Query (Aff (ArticleEffects eff))
+article :: forall g. (Functor g) => Component State Query g
 article = component render eval
   where
 
@@ -41,7 +36,7 @@ article = component render eval
       else
          [title]
 
-  eval ::  Natural Query (ComponentDSL State Query (Aff (ArticleEffects eff)))
+  eval ::  Natural Query (ComponentDSL State Query g)
   eval (Toggle next) = do
     modify (\(Article s)-> Article (s {visible = not s.visible}))
     pure next

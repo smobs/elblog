@@ -37,10 +37,9 @@ server = return (PSApp "static")
          :<|> blogHandler [1,2,3]
          :<|> serveDirectory "static/dist/"
 
-
 blogHandler ids = return $
  map
- (\i -> Blog i ("Blog " ++ show i) ("Content"))
+ (\i -> Blog i ("Blog " ++ show i) "## Subheading\n* Content **in bold** ")
  ids
 
 siteAPI :: Proxy SiteApi

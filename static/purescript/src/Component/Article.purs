@@ -2,8 +2,11 @@ module Component.Article where
 
 import Prelude
 import Halogen
+
+import  Halogen.HTML.Core (className)
 import qualified Halogen.HTML.Indexed as H
 import qualified Halogen.HTML.Events.Indexed as E
+import qualified Halogen.HTML.Properties.Indexed as P
 
 import Data.Functor.Coproduct (Coproduct())
 
@@ -39,16 +42,15 @@ article = parentComponent render eval
 
   render :: State -> ArticleHTML g
   render (Article state) =
-    let title = H.h2 [E.onClick (E.input_ Toggle)
-                     ]
+    let title = H.button [ E.onClick (E.input_ Toggle)
+                         , P.classes $ map className ["pure-u-1-1", "pure-button", "pure-button-primary"]]
                 [H.text state.title] in
-    H.div_
+    H.div [P.class_ (className "pure-g")]
       if state.visible
       then
         [ title
-        , H.text state.contents
-        , H.slot MarkdownSlot \_ -> { initialState: makeSlamDownState $ parseMd state.contents
-                                    , component: slamDownComponent {browserFeatures: defaultBrowserFeatures, formName: "article-markdown-form"}}
+        , H.div [P.class_ (className "pure-u-1-1")] [H.slot MarkdownSlot \_ -> { initialState: makeSlamDownState $ parseMd state.contents
+                                                                               , component: slamDownComponent {browserFeatures: defaultBrowserFeatures, formName: "article-markdown-form"}}]
         ]
       else
          [title]

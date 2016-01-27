@@ -4,9 +4,10 @@
 
 module Main where
 
+import           BlogRepo
+import           Control.Monad.IO.Class   (liftIO)
 import           Data.Aeson
 import           Data.Maybe               (fromMaybe)
-import           GHC.Generics
 import           Network.Wai
 import           Network.Wai.Handler.Warp
 import           PSApp
@@ -22,8 +23,6 @@ main = do
 app :: Application
 app = serve siteAPI server
 
-data Blog = Blog {id :: Int, title :: String, content :: String} deriving (Generic, Eq, Show)
-
 instance ToJSON Blog
 
 type BlogApi = "api" :> "blogs" :> Get '[JSON] [Blog]
@@ -34,13 +33,11 @@ type SiteApi = HomeApi :<|> BlogApi :<|> "static" :> Raw
 
 server ::  Server SiteApi
 server = return (PSApp "static")
-         :<|> blogHandler [1,2,3]
+         :<|> blogHandler
          :<|> serveDirectory "static/dist/"
 
-blogHandler ids = return $
- map
- (\i -> Blog i ("Blog " ++ show i) "## Subheading\n* Content **in bold** ")
- ids
+blogHandler :: Server BlogApi
+blogHandler  = liftIO serveBlogs
 
 siteAPI :: Proxy SiteApi
 siteAPI = Proxy

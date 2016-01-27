@@ -4,10 +4,12 @@ import Prelude
 import Halogen
 import qualified Halogen.HTML.Indexed as H
 import qualified Halogen.HTML.Events.Indexed as E
-import qualified Halogen.HTML.Properties.Indexed as P
 
-import Data.Foreign
-import Data.Foreign.Class
+import Data.Functor.Coproduct (Coproduct())
+
+import Text.Markdown.SlamDown
+import Text.Markdown.SlamDown.Html
+import Text.Markdown.SlamDown.Parser
 
 import Model
 
@@ -18,11 +20,24 @@ data Query a = Toggle a
 
 data ArticleContents = ArticleContents {title :: String, contents :: String}
 
-article :: forall g. (Functor g) => Component State Query g
-article = component render eval
+data MarkdownSlot = MarkdownSlot
+
+instance ordMarkdownSlot :: Ord MarkdownSlot where
+  compare _ _ = EQ
+
+instance eqMarkdownSlot :: Eq MarkdownSlot where
+  eq _ _ = true
+
+type FState g = InstalledState State SlamDownState Query SlamDownQuery g MarkdownSlot
+type FQuery = Coproduct Query (ChildF MarkdownSlot SlamDownQuery)
+type ArticleHTML g = ParentHTML SlamDownState Query SlamDownQuery g MarkdownSlot
+type ArticleDSL g = ParentDSL State SlamDownState Query SlamDownQuery g MarkdownSlot
+
+article :: forall g. (Functor g) => Component (FState g) FQuery g
+article = parentComponent render eval
   where
 
-  render :: State -> ComponentHTML Query
+  render :: State -> ArticleHTML g
   render (Article state) =
     let title = H.h2 [E.onClick (E.input_ Toggle)
                      ]
@@ -32,11 +47,13 @@ article = component render eval
       then
         [ title
         , H.text state.contents
+        , H.slot MarkdownSlot \_ -> { initialState: makeSlamDownState $ parseMd state.contents
+                                    , component: slamDownComponent {browserFeatures: defaultBrowserFeatures, formName: "article-markdown-form"}}
         ]
       else
          [title]
 
-  eval ::  Natural Query (ComponentDSL State Query g)
+  eval ::  Natural Query (ArticleDSL g)
   eval (Toggle next) = do
     modify (\(Article s)-> Article (s {visible = not s.visible}))
     pure next

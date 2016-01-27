@@ -18,6 +18,8 @@
     "purescript-generics": "~0.7.0",
     "purescript-coproducts": "~0.4.0",
     "purescript-affjax": "~0.10.1",
-    "purescript-foldable-traversable": "~0.4.2"
+    "purescript-foldable-traversable": "~0.4.2",
+    "purescript-markdown-halogen": "~0.8.3",
+    "purescript-markdown": "~1.12.0"
   }
 }

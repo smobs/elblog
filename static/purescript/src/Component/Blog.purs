@@ -4,7 +4,6 @@ import Prelude
 
 import Data.Generic (Generic, gEq, gCompare)
 import Data.Functor.Coproduct (Coproduct())
-import Data.Traversable
 
 import Halogen
 import qualified Halogen.HTML.Indexed as H
@@ -34,14 +33,15 @@ type State = Blog
 data Query a =
   Load a
 
-type FState g = InstalledState Blog Article Query Article.Query g ArticleSlot
-type FQuery = Coproduct Query (ChildF ArticleSlot Article.Query)
-
+type FState g = InstalledState Blog (Article.FState g) Query Article.FQuery g ArticleSlot
+type FQuery = Coproduct Query (ChildF ArticleSlot Article.FQuery)
+type BlogDSL g = ParentDSL State (Article.FState g) Query Article.FQuery g ArticleSlot
+type BlogHTML g = ParentHTML (Article.FState g) Query Article.FQuery g ArticleSlot
 -- | The component definition9
 blog :: forall a eff. (Functor a, MonadAff (BlogEffects eff) a) =>  Component (FState a) FQuery a
 blog = parentComponent render eval
   where
-    render :: State -> ParentHTML Article Query Article.Query a ArticleSlot
+    render :: State -> BlogHTML a
     render state =
       H.div [P.initializer \_ -> action Load]
       [ H.h1_
@@ -50,19 +50,19 @@ blog = parentComponent render eval
         (map renderArticle state.articles)
       ]
 
-    eval :: Natural Query (ParentDSL State Article.State Query Article.Query a ArticleSlot)
+    eval :: Natural Query (BlogDSL a)
     eval (Load a) = do
-      bs <-  liftH $ liftAff' getBlogs
+      bs <-  liftH $ liftAff' $ getBlogs
       let ids = map (\(Article b) -> {id: b.id, title: b.title, contents: b.contents}) bs
       modify (\s -> s {articles = ids})
-      traverse (\(Article b) -> query (ArticleSlot b.id) (action (Article.Load {title: b.title, contents:b.contents}))) bs
       pure a
     
 
-    renderArticle :: {title :: String, contents :: String, id :: ArticleId} -> ParentHTML Article Query Article.Query a ArticleSlot
-    renderArticle ar = H.slot (ArticleSlot (ar.id))
-                            (\_ -> {component: article,
-                                   initialState: initialArticle ar.id ar.title ar.contents})
+    renderArticle :: {title :: String, contents :: String, id :: ArticleId} -> BlogHTML a
+    renderArticle ar = H.slot
+                       (ArticleSlot (ar.id))
+                       \_ -> { initialState: installedState $ initialArticle ar.id ar.title ar.contents
+                             , component: article}
 
 getBlogs :: forall eff. Aff (ajax :: AJAX | eff) (Array Article)
 getBlogs = 

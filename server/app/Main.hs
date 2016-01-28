@@ -37,7 +37,7 @@ server = return (PSApp "static")
          :<|> serveDirectory "static/dist/"
 
 blogHandler :: Server BlogApi
-blogHandler  = liftIO serveBlogs
+blogHandler  = liftIO $ serveBlogs "blog"
 
 siteAPI :: Proxy SiteApi
 siteAPI = Proxy

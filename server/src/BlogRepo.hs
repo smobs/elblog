@@ -5,6 +5,7 @@ module BlogRepo
  where
 
 import           Control.Monad
+import           Data.List        (sortOn)
 import           Data.Maybe       (mapMaybe)
 import           GHC.Generics
 import           System.Directory
@@ -16,8 +17,8 @@ serveBlogs :: IO [Blog]
 serveBlogs = do
            content <- listDir "blog"
            blogDirs <- filterM  (\(_, f) ->  doesDirectoryExist f) content
-           let numDirs =   mapMaybe (\(i, f) ->  sequence (f, readMaybe i)) blogDirs
-           traverse readBlog numDirs
+           let numDirs = mapMaybe (\(i, f) ->  sequence (f, readMaybe i)) blogDirs
+           sortOn (\b -> - BlogRepo.id b) <$> traverse readBlog numDirs
 
      where
         readBlog :: (String ,Int) -> IO Blog

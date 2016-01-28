@@ -28,10 +28,10 @@ serveBlogs = do
 
 serveArticle :: FilePath -> IO (String, String)
 serveArticle dir = do
-             content <- map snd <$> listDir dir
-             blogFile <- head <$> filterM doesFileExist content
+             content <- listDir dir
+             (title, blogFile) <- head <$> filterM  (\(_, f) -> doesFileExist f) content
              contents <- readFile (blogFile)
-             return (blogFile, contents)
+             return (title, contents)
 
 
 listDir :: FilePath -> IO [ (FilePath, FilePath)]

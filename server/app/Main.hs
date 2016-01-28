@@ -4,7 +4,6 @@
 
 module Main where
 
-import           BlogRepo
 import           Control.Monad.IO.Class   (liftIO)
 import           Data.Aeson
 import           Data.Maybe               (fromMaybe)
@@ -13,6 +12,7 @@ import           Network.Wai.Handler.Warp
 import           PSApp
 import           Servant
 import           Servant.HTML.Blaze
+import           System.BlogRepository
 import           System.Environment
 
 main :: IO ()

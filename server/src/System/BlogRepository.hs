@@ -1,5 +1,5 @@
 {-# LANGUAGE DeriveGeneric #-}
-module BlogRepo
+module System.BlogRepository
       (serveBlogs
       , Blog())
  where
@@ -19,7 +19,7 @@ serveBlogs blogDir = do
            content <- listDir blogDir
            blogDirs <- filterM doesDirectoryExist content
            let numDirs = mapMaybe (\f ->  sequence (f, readMaybe  (takeBaseName f))) blogDirs
-           sortOn (\b -> - BlogRepo.id b) <$> traverse readBlog numDirs
+           sortOn (\b -> - System.BlogRepository.id b) <$> traverse readBlog numDirs
 
      where
         readBlog :: (String ,Int) -> IO Blog

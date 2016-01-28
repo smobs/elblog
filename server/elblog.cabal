@@ -15,7 +15,7 @@ cabal-version:       >=1.10
 
 library
   hs-source-dirs:      src
-  exposed-modules:     PSApp, BlogRepo
+  exposed-modules:     PSApp, System.BlogRepository
   build-depends:       base >= 4.7 && < 5
                      , blaze-html
                      , blaze-markup

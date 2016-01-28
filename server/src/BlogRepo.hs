@@ -9,6 +9,7 @@ import           Data.List        (sortOn)
 import           Data.Maybe       (mapMaybe)
 import           GHC.Generics
 import           System.Directory
+import           System.FilePath
 import           Text.Read
 
 data Blog = Blog {id :: Int, title :: String, content :: String} deriving (Generic, Eq, Show)
@@ -16,8 +17,8 @@ data Blog = Blog {id :: Int, title :: String, content :: String} deriving (Gener
 serveBlogs :: FilePath -> IO [Blog]
 serveBlogs blogDir = do
            content <- listDir blogDir
-           blogDirs <- filterM  (\(_, f) ->  doesDirectoryExist f) content
-           let numDirs = mapMaybe (\(i, f) ->  sequence (f, readMaybe i)) blogDirs
+           blogDirs <- filterM doesDirectoryExist content
+           let numDirs = mapMaybe (\f ->  sequence (f, readMaybe  (takeBaseName f))) blogDirs
            sortOn (\b -> - BlogRepo.id b) <$> traverse readBlog numDirs
 
      where
@@ -29,9 +30,9 @@ serveBlogs blogDir = do
         serveArticle :: FilePath -> IO (String, String)
         serveArticle dir = do
                     content <- listDir dir
-                    (title, blogFile) <- head <$> filterM  (\(_, f) -> doesFileExist f) content
+                    blogFile <- head <$> filterM doesFileExist content
                     contents <- readFile (blogFile)
-                    return (title, contents)
+                    return (takeBaseName blogFile, contents)
 
-listDir :: FilePath -> IO [ (FilePath, FilePath)]
-listDir dir = map (\x -> (x,  dir ++ "/" ++  x)) <$> getDirectoryContents dir
+listDir :: FilePath -> IO [FilePath]
+listDir dir = map (\x -> ( dir ++ "/" ++  x)) <$> getDirectoryContents dir

@@ -3,10 +3,10 @@ module Component.Article where
 import Prelude
 import Halogen
 
-import  Halogen.HTML.Core (className)
-import qualified Halogen.HTML.Indexed as H
-import qualified Halogen.HTML.Events.Indexed as E
-import qualified Halogen.HTML.Properties.Indexed as P
+import Halogen.HTML.Core (className)
+import Halogen.HTML.Indexed as H
+import Halogen.HTML.Events.Indexed as E
+import Halogen.HTML.Properties.Indexed as P
 
 import Data.Functor.Coproduct (Coproduct())
 

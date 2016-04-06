@@ -4,7 +4,6 @@ import Prelude
 import Control.Monad.Aff (runAff)
 import Control.Monad.Eff (Eff())
 import Control.Monad.Eff.Exception (throwException)
-import Control.Plus (Plus)
 
 import Halogen
 import Halogen.Util (appendToBody, onLoad)

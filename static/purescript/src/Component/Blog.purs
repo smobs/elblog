@@ -2,20 +2,20 @@ module Component.Blog where
 
 import Prelude
 
-import Data.Generic (Generic, gEq, gCompare)
+import Data.Generic (class Generic, gEq, gCompare)
 import Data.Functor.Coproduct (Coproduct())
 
 import Halogen
-import qualified Halogen.HTML.Indexed as H
-import qualified Halogen.HTML.Properties.Indexed as P
+import Halogen.HTML.Indexed as H
+import Halogen.HTML.Properties.Indexed as P
 
 import Model
 import Component.Article (article)
-import qualified Component.Article as Article
+import Component.Article as Article
 import Control.Monad.Aff (Aff())
 import Control.Monad.Aff.Class
 import Network.HTTP.Affjax (AJAX())
-import qualified Network.HTTP.Affjax as Ajax
+import Network.HTTP.Affjax as Ajax
 
 import Data.Foreign
 import Data.Foreign.Class

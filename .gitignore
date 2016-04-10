@@ -6,3 +6,14 @@
 /TAGS
 .stack-work/
 TAGS
+
+--clojure
+/target
+/classes
+/checkouts
+pom.xml
+pom.xml.asc
+*.jar
+*.class
+/.lein-*
+/.nrepl-port

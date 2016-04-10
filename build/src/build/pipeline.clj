@@ -8,6 +8,8 @@
   `(
     manualtrigger/wait-for-manual-trigger
     (in-parallel
-      stack-build
+     (alias "stack" (run 
+                    stack-build
+                    stack-test))
       gulp-build)
     stack-run))

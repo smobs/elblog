@@ -4,14 +4,19 @@
 (defn some-step-that-does-nothing [args ctx]
   {:status :success})
 
+(def path-root "../")
+
 (defn stack-build [args ctx]
-  (shell/bash ctx "../" "stack build"))
+  (shell/bash ctx path-root "stack build"))
 
 (defn stack-run [args ctx]
-  (shell/bash ctx "../" "stack exec elblog-server"))
+  (shell/bash ctx path-root "stack exec elblog-server"))
+
+(defn stack-test [args ctx] 
+  (shell/bash ctx path-root "stack test"))
 
 (defn gulp-build [args ctx]
-  (shell/bash ctx "../" "gulp"))
+  (shell/bash ctx path-root "gulp"))
 
 (defn some-failing-step [args ctx]
   (shell/bash ctx "/" "echo \"i am going to fail now...\"" "exit 1"))

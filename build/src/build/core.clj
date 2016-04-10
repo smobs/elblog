@@ -25,4 +25,4 @@
            (runners/start-one-run-after-another pipeline)
            ;; start the webserver to serve the UI
            (ring-server/serve app {:open-browser? false
-                                   :port 8080})))
+                                   :port 1337})))

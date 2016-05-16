@@ -9,8 +9,8 @@
     "gulp": "^3.9.1",
     "gulp-bower": "0.0.13",
     "gulp-purescript": "^0.8.0",
-    "purescript": "^0.8.3",
-    "webpack-stream": "^3.1.0"
+    "purescript": "^0.8.5",
+    "webpack-stream": "^3.2.0"
   },
   "author": "smobs"
 }

@@ -11,8 +11,10 @@ import Halogen.HTML.Properties.Indexed as P
 import Data.Functor.Coproduct (Coproduct())
 
 import Text.Markdown.SlamDown
-import Text.Markdown.SlamDown.Html
+import Text.Markdown.SlamDown.Halogen.Component
 import Text.Markdown.SlamDown.Parser
+
+import Data.Maybe (Maybe(..))
 
 import Model
 
@@ -31,13 +33,16 @@ instance ordMarkdownSlot :: Ord MarkdownSlot where
 instance eqMarkdownSlot :: Eq MarkdownSlot where
   eq _ _ = true
 
-type FState g = InstalledState State SlamDownState Query SlamDownQuery g MarkdownSlot
-type FQuery = Coproduct Query (ChildF MarkdownSlot SlamDownQuery)
-type ArticleHTML g = ParentHTML SlamDownState Query SlamDownQuery g MarkdownSlot
-type ArticleDSL g = ParentDSL State SlamDownState Query SlamDownQuery g MarkdownSlot
+type SlamS = SlamDownState String
+type SlamQ = SlamDownQuery String
+
+type FState g = ParentState State SlamS Query SlamQ g MarkdownSlot
+type FQuery = Coproduct Query (ChildF MarkdownSlot SlamQ)
+type ArticleHTML g = ParentHTML SlamS Query SlamQ g MarkdownSlot
+type ArticleDSL g = ParentDSL State SlamS Query SlamQ g MarkdownSlot
 
 article :: forall g. (Functor g) => Component (FState g) FQuery g
-article = parentComponent render eval
+article = parentComponent {render, eval, peek: Nothing}
   where
 
   render :: State -> ArticleHTML g
@@ -49,8 +54,9 @@ article = parentComponent render eval
       if state.visible
       then
         [ title
-        , H.div [P.class_ (className "pure-u-1-1")] [H.slot MarkdownSlot \_ -> { initialState: makeSlamDownState $ parseMd state.contents
-                                                                               , component: slamDownComponent {browserFeatures: defaultBrowserFeatures, formName: "article-markdown-form"}}]
+        , H.div [P.class_ (className "pure-u-1-1")] [H.slot MarkdownSlot \_ ->
+                                                      { initialState: replaceDocument (parseMd state.contents) emptySlamDownState
+                                                      , component: slamDownComponent {browserFeatures: defaultBrowserFeatures, formName: "article-markdown-form"}}]
         ]
       else
          [title]

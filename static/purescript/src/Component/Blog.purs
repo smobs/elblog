@@ -20,6 +20,7 @@ import Network.HTTP.Affjax as Ajax
 import Data.Foreign
 import Data.Foreign.Class
 import Data.Either (Either(..))
+import Data.Maybe (Maybe(..))
 
 newtype ArticleSlot = ArticleSlot ArticleId
 
@@ -33,13 +34,13 @@ type State = Blog
 data Query a =
   Load a
 
-type FState g = InstalledState Blog (Article.FState g) Query Article.FQuery g ArticleSlot
+type FState g = ParentState Blog (Article.FState g) Query Article.FQuery g ArticleSlot
 type FQuery = Coproduct Query (ChildF ArticleSlot Article.FQuery)
 type BlogDSL g = ParentDSL State (Article.FState g) Query Article.FQuery g ArticleSlot
 type BlogHTML g = ParentHTML (Article.FState g) Query Article.FQuery g ArticleSlot
 -- | The component definition9
 blog :: forall a eff. (Functor a, MonadAff (BlogEffects eff) a) =>  Component (FState a) FQuery a
-blog = parentComponent render eval
+blog = parentComponent {render, eval, peek: Nothing}
   where
     render :: State -> BlogHTML a
     render state =

@@ -35,6 +35,11 @@ gulp.task('psc-bundle', ['make'], function (){
   });
 });
 
+gulp.task("dotpsci", function () {
+  return purescript.psci({ src: sources, ffi: foreigns })
+    .pipe(gulp.dest("."));
+});
+
 gulp.task('bundle', ['psc-bundle'], function (){
   return gulp.src(pscBundle)
     .pipe(webpack({
@@ -49,6 +54,6 @@ gulp.task('css', function(){
     .pipe(gulp.dest("static/dist/css"));
 });
 
-gulp.task('default', ['css','bundle'])
+gulp.task('default', ['css','bundle', 'dotpsci'])
 
 gulp.task('heroku:prod', ['default']);

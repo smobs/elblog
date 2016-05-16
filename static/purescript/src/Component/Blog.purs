@@ -12,8 +12,9 @@ import Halogen.HTML.Properties.Indexed as P
 import Model
 import Component.Article (article)
 import Component.Article as Article
-import Control.Monad.Aff (Aff())
+import Control.Monad.Aff 
 import Control.Monad.Aff.Class
+import Control.Monad.Aff.Free
 import Network.HTTP.Affjax (AJAX())
 import Network.HTTP.Affjax as Ajax
 
@@ -53,7 +54,7 @@ blog = lifecycleParentComponent {render, eval, peek: Nothing, initializer: Just 
 
     eval :: Natural Query (BlogDSL a)
     eval (Load a) = do
-      bs <-  liftH $ liftAff' $ getBlogs
+      bs <-  liftH <<< liftH <<< liftAff $ getBlogs
       let ids = map (\(Article b) -> {id: b.id, title: b.title, contents: b.contents}) bs
       modify (\s -> s {articles = ids})
       pure a
@@ -62,7 +63,7 @@ blog = lifecycleParentComponent {render, eval, peek: Nothing, initializer: Just 
     renderArticle :: {title :: String, contents :: String, id :: ArticleId} -> BlogHTML a
     renderArticle ar = H.slot
                        (ArticleSlot (ar.id))
-                       \_ -> { initialState: installedState $ initialArticle ar.id ar.title ar.contents
+                       \_ -> { initialState: parentState $ initialArticle ar.id ar.title ar.contents
                              , component: article}
 
 getBlogs :: forall eff. Aff (ajax :: AJAX | eff) (Array Article)

@@ -40,11 +40,11 @@ type BlogDSL g = ParentDSL State (Article.FState g) Query Article.FQuery g Artic
 type BlogHTML g = ParentHTML (Article.FState g) Query Article.FQuery g ArticleSlot
 -- | The component definition9
 blog :: forall a eff. (Functor a, MonadAff (BlogEffects eff) a) =>  Component (FState a) FQuery a
-blog = parentComponent {render, eval, peek: Nothing}
+blog = lifecycleParentComponent {render, eval, peek: Nothing, initializer: Just (action Load), finalizer: Nothing}
   where
     render :: State -> BlogHTML a
     render state =
-      H.div [P.initializer \_ -> action Load]
+      H.div_
       [ H.h1_
           [ H.text "Toby's Blog" ]
       , H.div_

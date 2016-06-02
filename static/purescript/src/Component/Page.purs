@@ -53,15 +53,20 @@ page =
   parentComponent {render, eval, peek: Nothing}
   where
     render :: State -> PageHTML a
-    render (BlogPage s) = H.div_
-                          [ H.slot' pathToBlog BlogSlot (\_ -> {initialState: parentState s, component: Blog.blog})
-                          , H.slot' pathToJenny JennySlot (\_ -> {initialState: unit, component: Jenny.jenny})
-                          ]
+    render s = H.div_
+               [ H.h1_
+                 [ H.text "Toby's Blog" ]
+               , renderPage s]
 
     eval :: Natural Query (PageDSL a)
-    eval (Navigate _ a) =
+    eval (Navigate p a) = do
+      modify (\_ -> p)
       pure a
 
+    renderPage :: State -> PageHTML a
+    renderPage BlogPage = H.slot' pathToBlog BlogSlot (\_ -> {initialState: parentState initialBlog, component: Blog.blog})
+    renderPage JennyPage = H.slot' pathToJenny JennySlot (\_ -> {initialState: unit, component: Jenny.jenny})
+    
     pathToBlog :: ChildPath (Blog.FState a) (ChildState a) Blog.FQuery ChildQuery BlogSlot ChildSlot
     pathToBlog = cpL
 

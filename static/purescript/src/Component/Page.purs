@@ -4,6 +4,8 @@ import Prelude
 
 import Halogen
 import Halogen.HTML.Indexed as H
+import Halogen.Component.ChildPath (ChildPath(), cpL, cpR, (:>))
+
 import Control.Monad.Aff.Class
 
 import Data.Maybe (Maybe(Nothing))
@@ -51,8 +53,17 @@ page =
   parentComponent {render, eval, peek: Nothing}
   where
     render :: State -> PageHTML a
-    render state = H.text "Test"
+    render (BlogPage s) = H.div_
+                          [ H.slot' pathToBlog BlogSlot (\_ -> {initialState: parentState s, component: Blog.blog})
+                          , H.slot' pathToJenny JennySlot (\_ -> {initialState: unit, component: Jenny.jenny})
+                          ]
 
     eval :: Natural Query (PageDSL a)
     eval (Navigate _ a) =
       pure a
+
+    pathToBlog :: ChildPath (Blog.FState a) (ChildState a) Blog.FQuery ChildQuery BlogSlot ChildSlot
+    pathToBlog = cpL
+
+    pathToJenny :: ChildPath Jenny.State (ChildState a) Jenny.Query ChildQuery JennySlot ChildSlot
+    pathToJenny = cpR

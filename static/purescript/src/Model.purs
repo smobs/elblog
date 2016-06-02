@@ -13,6 +13,9 @@ type Blog = {articles :: Array {title :: String, contents :: String, id :: Artic
 
 data Article = Article {contents :: String, visible :: Boolean, title :: String, id :: ArticleId}
 
+initialPage :: Page
+initialPage = BlogPage initialBlog
+
 initialBlog :: Blog
 initialBlog = {articles : []}
 

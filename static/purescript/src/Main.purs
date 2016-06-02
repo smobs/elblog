@@ -11,10 +11,10 @@ import Halogen.Util (awaitBody)
 import Network.HTTP.Affjax (AJAX())
 
 import Model
-import Component.Blog
+import Component.Page
 
 main :: Eff (HalogenEffects (ajax :: AJAX)) Unit
 main = runAff throwException (const (pure unit)) do
   body <- awaitBody
-  runUI blog (parentState initialBlog) body
+  runUI page (parentState initialPage) body
 

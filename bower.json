@@ -23,6 +23,6 @@
     "purescript-markdown": "^3.1.1",
     "purescript-halogen-css": "^0.5.0",
     "purescript-routing": "^0.4.0",
-    "purescript-tuples": "^0.3"
+    "purescript-tuples": "^0.4"
   }
 }

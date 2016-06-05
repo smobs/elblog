@@ -16,7 +16,7 @@ jenny :: forall g . Component State Query g
 jenny = component {render, eval}
             where
               render :: State -> ComponentHTML Query
-              render _ = H.text "Jenny"
+              render _ = H.img  [P.src "static/resources/jenny.jpg"]
 
               eval :: Natural Query (ComponentDSL State Query g)
               eval (Noop a) = return a

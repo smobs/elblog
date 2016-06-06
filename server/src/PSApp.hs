@@ -14,10 +14,11 @@ instance ToMarkup PSApp where
 
 psPage :: PSApp -> Html
 psPage e = do
-         head $ do
-              psCss
-         body $ do
-              psImport e
+  docType
+  head $ do
+    psCss
+  body $ do
+      psImport e
 
 psImport :: PSApp -> Html
 psImport  (PSApp l) = script "" ! src  (stringValue $ l ++ "/bundle.js" ) ! type_ "text/javascript"

@@ -6,6 +6,7 @@ import Halogen
 import Halogen.HTML.Indexed as H
 import Halogen.HTML.Properties.Indexed as P
 import Halogen.HTML.Core (className, ClassName)
+import Halogen.HTML.CSS.PureCSS as Pure
 
 import Halogen.Component.ChildPath (ChildPath(), cpL, cpR, (:>))
 
@@ -60,10 +61,10 @@ page =
                [ renderLinks
                , H.h1_
                  [ H.text "Toby's Blog" ]
-               , H.div [P.class_ pureGrid]
-                 [H.div [P.class_ $ pureUnit 1 24] []
-                 , H.div [P.class_ $ pureUnit 22 24] [renderPage s]
-                 , H.div [P.class_ $ pureUnit 1 24] []]]
+               , H.div [P.class_ Pure.grid]
+                 [H.div [P.class_ $ Pure.u 1 24] []
+                 , H.div [P.class_ $ Pure.u 22 24] [renderPage s]
+                 , H.div [P.class_ $ Pure.u 1 24] []]]
 
     eval :: Natural Query (PageDSL a)
     eval (Navigate p a) = do
@@ -93,9 +94,3 @@ page =
                                                   [H.a [P.class_ $ className "pure-menu-link" , P.href l]
                                                     [H.text n]])
                              hs)]
-
-    pureGrid :: ClassName
-    pureGrid = className "pure-g"
-
-    pureUnit :: Int -> Int -> ClassName
-    pureUnit i n = className $ "pure-u-" ++ (show i) ++ "-" ++ (show n)

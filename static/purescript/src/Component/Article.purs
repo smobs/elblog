@@ -7,7 +7,7 @@ import Halogen.HTML.Core (className)
 import Halogen.HTML.Indexed as H
 import Halogen.HTML.Events.Indexed as E
 import Halogen.HTML.Properties.Indexed as P
-
+import Halogen.HTML.CSS.PureCSS as Pure
 import Data.Functor.Coproduct (Coproduct())
 
 import Text.Markdown.SlamDown
@@ -48,13 +48,13 @@ article = parentComponent {render, eval, peek: Nothing}
   render :: State -> ArticleHTML g
   render (Article state) =
     let title = H.button [ E.onClick (E.input_ Toggle)
-                         , P.classes $ map className ["pure-u-1-1", "pure-button", "pure-button-primary"]]
+                         , P.classes [Pure.u 1 1, Pure.button, Pure.buttonPrimary]]
                 [H.text state.title] in
-    H.div [P.class_ (className "pure-g")]
+    H.div [P.class_ Pure.grid]
       if state.visible
       then
         [ title
-        , H.div [P.class_ (className "pure-u-1-1")] [H.slot MarkdownSlot \_ ->
+        , H.div [P.class_ $ Pure.u 1 1] [H.slot MarkdownSlot \_ ->
                                                       { initialState: replaceDocument (parseMd state.contents) emptySlamDownState
                                                       , component: slamDownComponent {browserFeatures: defaultBrowserFeatures, formName: "article-markdown-form"}}]
         ]

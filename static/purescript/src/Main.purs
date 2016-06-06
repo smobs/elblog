@@ -1,20 +1,47 @@
 module Main where
 
 import Prelude
-import Control.Monad.Aff (runAff)
+
+import Control.Apply
+import Control.Alt ((<|>))
+import Control.Monad.Aff (runAff, forkAff, Aff(..))
 import Control.Monad.Eff (Eff())
 import Control.Monad.Eff.Exception (throwException)
 
+
+import Data.Maybe (Maybe(..))
+import Data.Tuple (Tuple(..))
+import Data.Functor
+import Data.Functor.Coproduct (left)
 import Halogen
 import Halogen.Util (awaitBody)
+
+import Routing
+import Routing.Match
+import Routing.Match.Class
 
 import Network.HTTP.Affjax (AJAX())
 
 import Model
-import Component.Blog
+import Component.Page
 
 main :: Eff (HalogenEffects (ajax :: AJAX)) Unit
 main = runAff throwException (const (pure unit)) do
   body <- awaitBody
-  runUI blog (parentState initialBlog) body
+  driver <- runUI page (parentState initialPage) body
+  forkAff $ routeSignal driver
 
+routeSignal :: forall eff. Driver FQuery eff -> Aff (HalogenEffects eff) Unit
+routeSignal driver = do
+  Tuple old new <- matchesAff routing
+  redirects driver old new
+
+redirects :: forall eff. Driver FQuery eff
+             -> Maybe Page
+             -> Page
+             -> Aff (HalogenEffects eff) Unit
+redirects d _ = d  <<< left <<< action <<< Navigate
+
+routing :: Match Page
+routing = JennyPage <$ lit "" <* lit "jenny"
+          <|> BlogPage <$ lit "" <* lit "blog"

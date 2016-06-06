@@ -46,11 +46,8 @@ blog = lifecycleParentComponent {render, eval, peek: Nothing, initializer: Just 
     render :: State -> BlogHTML a
     render state =
       H.div_
-      [ H.h1_
-          [ H.text "Toby's Blog" ]
-      , H.div_
-        (map renderArticle state.articles)
-      ]
+      (map renderArticle state.articles)
+      
 
     eval :: Natural Query (BlogDSL a)
     eval (Load a) = do

@@ -48,7 +48,7 @@ article = parentComponent {render, eval, peek: Nothing}
   render :: State -> ArticleHTML g
   render (Article state) =
     let title = H.button [ E.onClick (E.input_ Toggle)
-                         , P.classes $ [(Pure.u 1 1)] ++  map className ["pure-button", "pure-button-primary"]]
+                         , P.classes [Pure.u 1 1, Pure.button, Pure.buttonPrimary]]
                 [H.text state.title] in
     H.div [P.class_ Pure.grid]
       if state.visible

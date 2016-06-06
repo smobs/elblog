@@ -81,16 +81,7 @@ page =
     pathToJenny :: ChildPath Jenny.State (ChildState a) Jenny.Query ChildQuery JennySlot ChildSlot
     pathToJenny = cpR
 
-    renderLinks :: PageHTML a
-    renderLinks = makeHeader "TOBY" [ Tuple "BLOG" "/#/blog"
+    renderLinks :: forall p i . HTML p i
+    renderLinks = Pure.horizontalMenu "TOBY" [ Tuple "BLOG" "/#/blog"
                   , Tuple "JENNY" "/#/jenny"
                   ]
-
-    makeHeader :: String -> Array (Tuple String String) -> PageHTML a
-    makeHeader title hs = H.div [P.classes $ map className ["pure-menu", "pure-menu-horizontal"]]
-                          [ H.a [P.href "/#/", P.classes $ map className ["pure-menu-heading", "pure-menu-link"]] [H.text title]
-                          , H.ul [P.class_ $ className "pure-menu-list"]
-                            (map (\(Tuple n l) -> H.li [P.class_ $ className "pure-menu-item"]
-                                                  [H.a [P.class_ $ className "pure-menu-link" , P.href l]
-                                                    [H.text n]])
-                             hs)]

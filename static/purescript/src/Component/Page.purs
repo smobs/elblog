@@ -5,7 +5,7 @@ import Prelude
 import Halogen
 import Halogen.HTML.Indexed as H
 import Halogen.HTML.Properties.Indexed as P
-import Halogen.HTML.Core (className)
+import Halogen.HTML.Core (className, ClassName)
 
 import Halogen.Component.ChildPath (ChildPath(), cpL, cpR, (:>))
 
@@ -60,7 +60,10 @@ page =
                [ renderLinks
                , H.h1_
                  [ H.text "Toby's Blog" ]
-               , renderPage s]
+               , H.div [P.class_ pureGrid]
+                 [H.div [P.class_ $ pureUnit 1 24] []
+                 , H.div [P.class_ $ pureUnit 22 24] [renderPage s]
+                 , H.div [P.class_ $ pureUnit 1 24] []]]
 
     eval :: Natural Query (PageDSL a)
     eval (Navigate p a) = do
@@ -83,10 +86,16 @@ page =
                   ]
 
     makeHeader :: String -> Array (Tuple String String) -> PageHTML a
-    makeHeader title hs = H.div [P.classes $ map className ["pure-menu", "pure-menu-horizontal", "pure-u-1"]]
+    makeHeader title hs = H.div [P.classes $ map className ["pure-menu", "pure-menu-horizontal"]]
                           [ H.a [P.href "/#/", P.classes $ map className ["pure-menu-heading", "pure-menu-link"]] [H.text title]
                           , H.ul [P.class_ $ className "pure-menu-list"]
                             (map (\(Tuple n l) -> H.li [P.class_ $ className "pure-menu-item"]
                                                   [H.a [P.class_ $ className "pure-menu-link" , P.href l]
                                                     [H.text n]])
                              hs)]
+
+    pureGrid :: ClassName
+    pureGrid = className "pure-g"
+
+    pureUnit :: Int -> Int -> ClassName
+    pureUnit i n = className $ "pure-u-" ++ (show i) ++ "-" ++ (show n)

@@ -4,6 +4,9 @@ import Prelude
 
 import Halogen
 import Halogen.HTML.Indexed as H
+import Halogen.HTML.Properties.Indexed as P
+import Halogen.HTML.Core (className)
+
 import Halogen.Component.ChildPath (ChildPath(), cpL, cpR, (:>))
 
 import Control.Monad.Aff.Class
@@ -11,6 +14,7 @@ import Control.Monad.Aff.Class
 import Data.Maybe (Maybe(Nothing))
 import Data.Either (Either(..))
 import Data.Functor.Coproduct (Coproduct())
+import Data.Tuple
 
 import Component.Blog as Blog
 import Component.Jenny as Jenny
@@ -38,7 +42,6 @@ instance eqJennySlot :: Eq JennySlot where
   eq _ _ = true
 
 
-
 type ChildState g = Either (Blog.FState g) Jenny.State
 type ChildQuery = Coproduct (Blog.FQuery) (Jenny.Query )
 type ChildSlot = Either BlogSlot JennySlot
@@ -54,7 +57,8 @@ page =
   where
     render :: State -> PageHTML a
     render s = H.div_
-               [ H.h1_
+               [ renderLinks
+               , H.h1_
                  [ H.text "Toby's Blog" ]
                , renderPage s]
 
@@ -72,3 +76,17 @@ page =
 
     pathToJenny :: ChildPath Jenny.State (ChildState a) Jenny.Query ChildQuery JennySlot ChildSlot
     pathToJenny = cpR
+
+    renderLinks :: PageHTML a
+    renderLinks = makeHeader "TOBY" [ Tuple "BLOG" "/#/blog"
+                  , Tuple "JENNY" "/#/jenny"
+                  ]
+
+    makeHeader :: String -> Array (Tuple String String) -> PageHTML a
+    makeHeader title hs = H.div [P.classes $ map className ["pure-menu", "pure-menu-horizontal", "pure-u-1"]]
+                          [ H.a [P.href "/#/", P.classes $ map className ["pure-menu-heading", "pure-menu-link"]] [H.text title]
+                          , H.ul [P.class_ $ className "pure-menu-list"]
+                            (map (\(Tuple n l) -> H.li [P.class_ $ className "pure-menu-item"]
+                                                  [H.a [P.class_ $ className "pure-menu-link" , P.href l]
+                                                    [H.text n]])
+                             hs)]

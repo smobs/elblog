@@ -43,5 +43,5 @@ redirects :: forall eff. Driver FQuery eff
 redirects d _ = d  <<< left <<< action <<< Navigate
 
 routing :: Match Page
-routing = JennyPage <$ lit "" <* lit "jenny"
+routing = AboutPage <$ lit "" <* lit "about"
           <|> BlogPage <$ lit "" <* lit "blog"

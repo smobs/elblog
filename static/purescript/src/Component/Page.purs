@@ -18,7 +18,7 @@ import Data.Functor.Coproduct (Coproduct())
 import Data.Tuple
 
 import Component.Blog as Blog
-import Component.Jenny as Jenny
+import Component.About as About
 import Model
 
 type State = Page
@@ -35,17 +35,17 @@ instance ordBlogSlot :: Ord BlogSlot where
 instance eqBlogSlot :: Eq BlogSlot where
   eq _ _ = true
 
-data JennySlot = JennySlot
-instance ordJennySlot :: Ord JennySlot where
+data AboutSlot = AboutSlot
+instance ordAboutSlot :: Ord AboutSlot where
   compare _ _ = EQ
 
-instance eqJennySlot :: Eq JennySlot where
+instance eqAboutSlot :: Eq AboutSlot where
   eq _ _ = true
 
 
-type ChildState g = Either (Blog.FState g) Jenny.State
-type ChildQuery = Coproduct (Blog.FQuery) (Jenny.Query )
-type ChildSlot = Either BlogSlot JennySlot
+type ChildState g = Either (Blog.FState g) About.State
+type ChildQuery = Coproduct (Blog.FQuery) (About.Query )
+type ChildSlot = Either BlogSlot AboutSlot
 
 type FState g = ParentState State (ChildState g) Query ChildQuery g ChildSlot
 type FQuery = Coproduct Query (ChildF ChildSlot ChildQuery)
@@ -73,15 +73,15 @@ page =
 
     renderPage :: State -> PageHTML a
     renderPage BlogPage = H.slot' pathToBlog BlogSlot (\_ -> {initialState: parentState initialBlog, component: Blog.blog})
-    renderPage JennyPage = H.slot' pathToJenny JennySlot (\_ -> {initialState: unit, component: Jenny.jenny})
+    renderPage AboutPage = H.slot' pathToAbout AboutSlot (\_ -> {initialState: unit, component: About.about})
     
     pathToBlog :: ChildPath (Blog.FState a) (ChildState a) Blog.FQuery ChildQuery BlogSlot ChildSlot
     pathToBlog = cpL
 
-    pathToJenny :: ChildPath Jenny.State (ChildState a) Jenny.Query ChildQuery JennySlot ChildSlot
-    pathToJenny = cpR
+    pathToAbout :: ChildPath About.State (ChildState a) About.Query ChildQuery AboutSlot ChildSlot
+    pathToAbout = cpR
 
     renderLinks :: forall p i . HTML p i
     renderLinks = Pure.horizontalMenu "TOBY" [ Tuple "BLOG" "/#/blog"
-                  , Tuple "JENNY" "/#/jenny"
+                  , Tuple "ABOUT" "/#/about"
                   ]

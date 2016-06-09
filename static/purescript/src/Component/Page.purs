@@ -59,8 +59,6 @@ page =
     render :: State -> PageHTML a
     render s = H.div_
                [ renderLinks
-               , H.h1_
-                 [ H.text "Toby's Blog" ]
                , H.div [P.class_ Pure.grid]
                  [H.div [P.class_ $ Pure.u 1 24] []
                  , H.div [P.class_ $ Pure.u 22 24] [renderPage s]
@@ -82,6 +80,4 @@ page =
     pathToAbout = cpR
 
     renderLinks :: forall p i . HTML p i
-    renderLinks = Pure.horizontalMenu "TOBY" [ Tuple "BLOG" "/#/blog"
-                  , Tuple "ABOUT" "/#/about"
-                  ]
+    renderLinks = Pure.horizontalMenu "TOBY'S BLOG" [ Tuple "ABOUT" "/#/about"]

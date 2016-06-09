@@ -44,4 +44,4 @@ redirects d _ = d  <<< left <<< action <<< Navigate
 
 routing :: Match Page
 routing = AboutPage <$ lit "" <* lit "about"
-          <|> BlogPage <$ lit "" <* lit "blog"
+          <|> BlogPage <$ lit ""

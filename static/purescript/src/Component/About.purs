@@ -16,7 +16,16 @@ about :: forall g . Component State Query g
 about = component {render, eval}
             where
               render :: State -> ComponentHTML Query
-              render _ = H.img  [P.src "static/resources/jenny.jpg"]
+              render _ = H.div_
+                         [ H.h2_ [H.text "Source"]
+                         , H.div_
+                           [ H.a
+                             [ P.href "https://github.com/smobs/elblog"
+                             , P.target "_blank"
+                             ]
+                             [H.text "On Github"]
+                           ]
+                         ]
 
               eval :: Natural Query (ComponentDSL State Query g)
               eval (Noop a) = return a

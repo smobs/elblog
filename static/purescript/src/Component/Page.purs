@@ -17,6 +17,8 @@ import Data.Either (Either(..))
 import Data.Functor.Coproduct (Coproduct())
 import Data.Tuple
 
+import HTML.Components as C
+
 import Component.Blog as Blog
 import Component.About as About
 import Model
@@ -80,4 +82,4 @@ page =
     pathToAbout = cpR
 
     renderLinks :: forall p i . HTML p i
-    renderLinks = Pure.horizontalMenu "TOBY'S BLOG" [ Tuple "ABOUT" "/#/about"]
+    renderLinks = C.nav "TOBY'S BLOG" [ Tuple "ABOUT" "/#/about"]

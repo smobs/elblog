@@ -17,7 +17,9 @@ about = component {render, eval}
             where
               render :: State -> ComponentHTML Query
               render _ = H.div_
-                         [ H.h2_ [H.text "Source"]
+                         [ H.h2_ [H.text "Me"]
+                         , H.img [P.src "/static/resources/me.jpg", P.height $ P.Pixels 200]
+                         ,  H.h2_ [H.text "Source"]
                          , H.div_
                            [ H.a
                              [ P.href "https://github.com/smobs/elblog"

@@ -20,12 +20,10 @@ import Routing
 import Routing.Match
 import Routing.Match.Class
 
-import Network.HTTP.Affjax (AJAX())
-
 import Model
 import Component.Page
 
-main :: Eff (HalogenEffects (ajax :: AJAX)) Unit
+main :: forall e . Eff (HalogenEffects (PageEffects ())) Unit
 main = runHalogenAff do
   body <- awaitBody
   driver <- runUI page (parentState initialPage) body

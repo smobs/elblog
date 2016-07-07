@@ -26,7 +26,7 @@ import Component.Pong as Pong
 import Model
 
 type State = Page
-type PageEffects a = Blog.BlogEffects a
+type PageEffects a = Pong.PongEffects(Blog.BlogEffects a)
 
 data Query a =
   Navigate Page a
@@ -63,7 +63,7 @@ type FQuery = Coproduct Query (ChildF ChildSlot ChildQuery)
 type PageDSL g = ParentDSL State (ChildState g) Query ChildQuery g ChildSlot
 type PageHTML g = ParentHTML (ChildState g) Query ChildQuery g ChildSlot
 
-page :: forall a eff . (Functor a, MonadAff (PageEffects eff) a) => Component (FState a) FQuery a
+page :: forall a eff . (Functor a, MonadAff (HalogenEffects(PageEffects eff)) a) => Component (FState a) FQuery a
 page =
   parentComponent {render, eval, peek: Nothing}
   where
@@ -83,7 +83,7 @@ page =
     renderPage :: State -> PageHTML a
     renderPage BlogPage = H.slot' pathToBlog BlogSlot (\_ -> {initialState: parentState initialBlog, component: Blog.blog})
     renderPage AboutPage = H.slot' pathToAbout AboutSlot (\_ -> {initialState: unit, component: About.about})
-    renderPage PongPage = H.slot' pathToPong PongSlot (\_ -> {initialState: unit, component: Pong.about})
+    renderPage PongPage = H.slot' pathToPong PongSlot (\_ -> {initialState: unit, component: Pong.game})
     
     pathToBlog :: ChildPath (Blog.FState a) (ChildState a) Blog.FQuery ChildQuery BlogSlot ChildSlot
     pathToBlog = cpL

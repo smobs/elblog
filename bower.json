@@ -25,6 +25,7 @@
     "purescript-routing": "^2.0.0",
     "purescript-tuples": "^1.0",
     "purescript-canvas": "^1.0",
-    "purescript-drawing": "^1.0.0"
+    "purescript-drawing": "^1.0.0",
+    "purescript-integers": "^1.1"
   }
 }

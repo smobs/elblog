@@ -83,7 +83,7 @@ page =
     renderPage :: State -> PageHTML a
     renderPage BlogPage = H.slot' pathToBlog BlogSlot (\_ -> {initialState: parentState initialBlog, component: Blog.blog})
     renderPage AboutPage = H.slot' pathToAbout AboutSlot (\_ -> {initialState: unit, component: About.about})
-    renderPage PongPage = H.slot' pathToPong PongSlot (\_ -> {initialState: {x: 0.0, y: 0.0}, component: Pong.game})
+    renderPage PongPage = H.slot' pathToPong PongSlot (\_ -> {initialState: Pong.initial, component: Pong.game})
     
     pathToBlog :: ChildPath (Blog.FState a) (ChildState a) Blog.FQuery ChildQuery BlogSlot ChildSlot
     pathToBlog = cpL

@@ -2,20 +2,16 @@ module Component.Pong where
 
 import Prelude
 import Halogen
-
-import Halogen.HTML.Core (className)
-import Halogen.HTML.Indexed as H
-import Halogen.HTML.Events.Indexed as E
-import Halogen.HTML.Properties.Indexed as P
-
-import Data.Maybe(Maybe(..))
 import Data.Int
-
 import Graphics.Canvas
 import Graphics.Drawing
-
 import Control.Monad.Eff
 import Control.Monad.Eff.Class
+import Halogen.HTML.Events.Indexed as E
+import Halogen.HTML.Indexed as H
+import Halogen.HTML.Properties.Indexed as P
+import Data.Maybe (Maybe(..))
+import Halogen.HTML.Core (className)
 
 type State = {p1 :: Number, p2 :: Number, bx :: Number, by :: Number, bdirX :: Number, bdirY :: Number}
 
@@ -30,7 +26,13 @@ game :: forall g eff. (Functor g, MonadEff (HalogenEffects(PongEffects eff)) g) 
 game = lifecycleComponent {render, eval, initializer: Just (action NewGame), finalizer: Nothing}
             where
               render :: State -> ComponentHTML Query
-              render _ = H.canvas [P.id_ canvasName, E.onKeyDown (E.input_  Move), P.tabIndex 0, P.height $ P.Pixels $ ceil canvasSize.h, P.width $ P.Pixels $ ceil canvasSize.w ]
+              render _ = H.canvas [P.id_ canvasName
+                                  , E.onKeyDown (E.input_ Move)
+                                  , P.tabIndex 0
+                                  , P.height $ P.Pixels $ ceil canvasSize.h
+                                  , P.width
+                                    $ P.Pixels
+                                    $ ceil canvasSize.w ]
 
               eval :: Natural Query (ComponentDSL State Query g)
               eval (NewGame a) = do

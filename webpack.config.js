@@ -8,7 +8,7 @@ const config =
                        , port: 4008
                        , stats: 'errors-only'
                      }
-        , entry: './static/entry'
+        , entry: './static/pong'
         , output: {path: path.join(__dirname, "static/dist")
                    , pathinfo: true
                    , filename: "bundle.js"
@@ -16,7 +16,7 @@ const config =
         , module: { loaders: [ { test: /\.purs$/
                            , loader: 'purs-loader'
                            , query: { src: [ 'bower_components/purescript-*/src/**/*.purs', 'static/purescript/src/**/*.purs' ]
-                                    , bundle: true
+                                    , bundle: false
                                     , psc: 'node_modules/purescript/bin/psc.js'
                                     , pscBundle: 'node_modules/purescript/bin/psc-bundle.js'
                                     , pscArgs: { sourceMaps: true, ffi: ['static/purescript/src/**/*.js', 'bower_components/purescript-*/src/**/*.js']}

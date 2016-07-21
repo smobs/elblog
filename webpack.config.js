@@ -4,6 +4,10 @@ const path = require('path');
 const config = 
       { debug: true
         , devtool: 'source-map'
+        , devServer: { contentBase: '.'
+                       , port: 4008
+                       , stats: 'errors-only'
+                     }
         , entry: './static/entry'
         , output: {path: path.join(__dirname, "static/dist")
                    , pathinfo: true
@@ -15,7 +19,7 @@ const config =
                                     , bundle: true
                                     , psc: 'node_modules/purescript/bin/psc.js'
                                     , pscBundle: 'node_modules/purescript/bin/psc-bundle.js'
-                                    , pscArgs: { sourceMaps: true}
+                                    , pscArgs: { sourceMaps: true, ffi: ['static/purescript/src/**/*.js', 'bower_components/purescript-*/src/**/*.js']}
                                     , pscIde: true
                                     }
                            }

@@ -18,8 +18,12 @@
     "webpack-stream": "^3.2.0",
     "webpack-validator": "^2.2.3"
   },
-  "scripts": {
-    "psc:server": "psc-ide-server --debug"
-  },
+  "scripts" : {
+    "webpack": "webpack --progress --bail",
+    "webpack:watch": "webpack --progress --watch",
+    "webpack:watch:debug": "DEBUG=purs-loader webpack --progress --watch",
+    "webpack:server": "webpack-dev-server --progress --inline --hot",
+    "webpack:server:debug": "DEBUG=purs-loader webpack-dev-server --progress --inline --hot",
+    "psc:server": "psc-ide-server --debug" },
   "author": "smobs"
 }

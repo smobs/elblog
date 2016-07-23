@@ -20,6 +20,7 @@
   },
   "scripts" : {
     "webpack": "webpack --progress --bail",
+    "webpack:debug": "DEBUG=purs-loader webpack --progress",
     "webpack:watch": "webpack --progress --watch",
     "webpack:watch:debug": "DEBUG=purs-loader webpack --progress --watch",
     "webpack:server": "webpack-dev-server --progress --inline --hot",

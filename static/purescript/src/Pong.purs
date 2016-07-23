@@ -13,9 +13,23 @@ newtype PongState = PongState { p1 :: Number
                               , bdirX :: Number
                               , bdirY :: Number}
 
+
+data Player = One | Two
+data Move = Up | Down
+data PongCommand = MovePlayer {player :: Player, move :: Move}
+
 initial :: PongState
 initial = PongState {p1: 0.0, p2: 0.0, bx: 40.0, by: 40.0, bdirX: 1.0, bdirY: 1.0}
 
+sendCommand :: PongCommand -> PongState -> PongState
+sendCommand (MovePlayer {player, move}) (PongState s) = PongState (
+  let f = case move of
+        Up -> (-)
+        Down -> (+)
+  in
+   case player of
+     One -> s {p1 = f s.p1 1.0}
+     Two -> s {p2 = f s.p2 1.0})
 
 renderPong :: String -> PongState -> Eff (canvas :: Canvas) Unit
 renderPong id (PongState s) =  do
@@ -25,7 +39,7 @@ renderPong id (PongState s) =  do
   render ctx $
     filled (fillColor black) (rectangle 0.0 s.p1 batSize.w batSize.h)
   render ctx $
-    filled (fillColor black) (rectangle (canvasSize.w - batSize.w) s.p1 batSize.w batSize.h)
+    filled (fillColor black) (rectangle (canvasSize.w - batSize.w) s.p2 batSize.w batSize.h)
   return unit
 
 type Dimension = {h :: Number, w :: Number}

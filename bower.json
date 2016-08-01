@@ -11,18 +11,18 @@
     "output"
   ],
   "dependencies": {
-    "purescript-console": "~0",
-    "purescript-halogen": "^0.8.0",
-    "purescript-aff": "^0.16.1",
-    "purescript-eff": "~0",
-    "purescript-generics": "^0.7.0",
-    "purescript-coproducts": "^0.4.0",
-    "purescript-affjax": "^0.13.1",
-    "purescript-foldable-traversable": "~0",
-    "purescript-markdown-halogen": "^0.13.0",
-    "purescript-markdown": "^3.1.1",
-    "purescript-halogen-css": "^0.5.0",
-    "purescript-routing": "^0.4.0",
-    "purescript-tuples": "^0.4"
+    "purescript-console": "^1.0.0",
+    "purescript-halogen": "^0.11",
+    "purescript-aff": "^1.1",
+    "purescript-eff": "^1.0.0",
+    "purescript-generics": "^1.0.0",
+    "purescript-functor-coproducts": "^1.0.1",
+    "purescript-affjax": "^2.0.0",
+    "purescript-foldable-traversable": "^1.0.0",
+    "purescript-markdown-halogen": "^2.0.0",
+    "purescript-markdown": "^7.0.0",
+    "purescript-halogen-css": "^3.0.0",
+    "purescript-routing": "^2.0.0",
+    "purescript-tuples": "^1.0"
   }
 }

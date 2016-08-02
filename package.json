@@ -10,7 +10,16 @@
     "gulp-bower": "0.0.13",
     "gulp-purescript": "^1.0.0",
     "purescript": "^0.9.2",
-    "webpack-stream": "^3.2.0"
+    "purescript-psa": "^0.3.9",
+    "purs-loader": "^2.0.0-rc.1",
+    "source-map-loader": "^0.1.5",
+    "webpack": "^1.13.1",
+    "webpack-dev-server": "^1.14.1",
+    "webpack-stream": "^3.2.0",
+    "webpack-validator": "^2.2.3"
+  },
+  "scripts": {
+    "psc:server": "psc-ide-server --debug"
   },
   "author": "smobs"
 }

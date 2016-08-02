@@ -29,4 +29,4 @@ instance articleIsForeign :: IsForeign Article where
     id <- readProp "id" value
     title <- readProp "title" value
     contents <- readProp "content" value
-    return $ Article {contents: contents, visible: false, title: title, id: id}
+    pure $ Article {contents: contents, visible: false, title: title, id: id}

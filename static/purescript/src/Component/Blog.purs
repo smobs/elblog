@@ -49,7 +49,7 @@ blog = lifecycleParentComponent {render, eval, peek: Nothing, initializer: Just 
       (map renderArticle state.articles)
       
 
-    eval :: Natural Query (BlogDSL a)
+    eval :: Query ~> (BlogDSL a)
     eval (Load a) = do
       bs <-  liftH <<< liftH <<< liftAff $ getBlogs
       let ids = map (\(Article b) -> {id: b.id, title: b.title, contents: b.contents}) bs
@@ -68,7 +68,7 @@ getBlogs =
   let url = "api/blogs" in
   do
     resp <- Ajax.get url
-    return case
+    pure case
       readJSON resp.response :: F (Array Article)
       of
         Right ids -> ids

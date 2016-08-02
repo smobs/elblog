@@ -8,7 +8,7 @@ grid :: ClassName
 grid = className "pure-g"
 
 u :: Int -> Int -> ClassName
-u i n = className $ "pure-u-" ++ (show i) ++ "-" ++ (show n)
+u i n = className $ "pure-u-" <> (show i) <> "-" <> (show n)
 
 button :: ClassName
 button = className "pure-button"

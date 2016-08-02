@@ -34,28 +34,31 @@ game = lifecycleComponent {render, eval, initializer: Just (action NewGame), fin
                                     $ P.Pixels
                                     $ ceil canvasSize.w ]
 
-              eval :: Natural Query (ComponentDSL State Query g)
+              eval :: Query ~> (ComponentDSL State Query g)
               eval (NewGame a) = do
                 s <- get 
                 liftH <<< liftEff $ draw s
-                return a
+                pure a
               eval (Move a) = do
                 modify (\s -> s {p1 = s.p1 + 1.0})
                 s <- get
                 liftH <<< liftEff $ draw s
-                return a
+                pure a
                 
 
-draw :: State -> forall eff. Eff (canvas :: Canvas | eff) Unit
+draw :: State -> forall eff. Eff (canvas :: CANVAS | eff) Unit
 draw s = do
-  Just canvas <- getCanvasElementById canvasName
-  ctx <- getContext2D canvas
-  clearRect ctx {x: 0.0, y: 0.0, w: canvasSize.w, h: canvasSize.h} 
-  render ctx $
-    filled (fillColor black) (rectangle 0.0 s.p1 batSize.w batSize.h)
-  render ctx $
-    filled (fillColor black) (rectangle (canvasSize.w - batSize.w) s.p1 batSize.w batSize.h)
-  return unit
+  mCanvas <- getCanvasElementById canvasName
+  case mCanvas of
+    Just canvas -> do
+      ctx <- getContext2D canvas
+      clearRect ctx {x: 0.0, y: 0.0, w: canvasSize.w, h: canvasSize.h} 
+      render ctx $
+        filled (fillColor black) (rectangle 0.0 s.p1 batSize.w batSize.h)
+      render ctx $
+        filled (fillColor black) (rectangle (canvasSize.w - batSize.w) s.p1 batSize.w batSize.h)
+      pure unit
+    Nothing -> pure unit
 
 canvasName :: String
 canvasName = "Foo"

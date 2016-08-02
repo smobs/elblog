@@ -19,7 +19,7 @@ const config =
                                     , bundle: false
                                     , psc: 'node_modules/purescript/bin/psc.js'
                                     , pscBundle: 'node_modules/purescript/bin/psc-bundle.js'
-                                    , pscArgs: { sourceMaps: true, ffi: ['static/purescript/src/**/*.js', 'bower_components/purescript-*/src/**/*.js']}
+                                    , pscArgs: { sourceMaps: true }
                                     , pscIde: true
                                     }
                            }

@@ -2,8 +2,8 @@ module Pong where
 
 import Prelude
 import Control.Monad.Eff (Eff)
-import Data.Maybe (Maybe(Just))
-import Graphics.Canvas (clearRect, getContext2D, getCanvasElementById, Canvas)
+import Data.Maybe (Maybe(..))
+import Graphics.Canvas (clearRect, getContext2D, getCanvasElementById, CANVAS)
 import Graphics.Drawing (render, rectangle, filled, black, fillColor)
 
 type BatState = {pos :: Number, dir :: Move}
@@ -39,16 +39,20 @@ updateBat bs@{pos, dir} =
     Up -> bs {pos = pos - 1.0}
     Down -> bs {pos = pos + 1.0}
     
-renderPong :: String -> PongState -> Eff (canvas :: Canvas) Unit
+renderPong :: String -> PongState -> Eff (canvas :: CANVAS) Unit
 renderPong id (PongState s) =  do
-  Just canvas <- getCanvasElementById id
-  ctx <- getContext2D canvas
-  clearRect ctx {x: 0.0, y: 0.0, w: canvasSize.w, h: canvasSize.h} 
-  render ctx $
-    filled (fillColor black) (rectangle 0.0 s.p1.pos batSize.w batSize.h)
-  render ctx $
-    filled (fillColor black) (rectangle (canvasSize.w - batSize.w) s.p2.pos batSize.w batSize.h)
-  return unit
+  mCanvas <- getCanvasElementById id
+  case mCanvas of
+    Just canvas -> do
+      ctx <- getContext2D canvas
+      clearRect ctx {x: 0.0, y: 0.0, w: canvasSize.w, h: canvasSize.h} 
+      render ctx $
+        filled (fillColor black) (rectangle 0.0 s.p1.pos batSize.w batSize.h)
+      render ctx $
+        filled (fillColor black) (rectangle (canvasSize.w - batSize.w) s.p2.pos batSize.w batSize.h)
+      pure unit
+    Nothing -> pure unit
+      
 
 
 type Dimension = {h :: Number, w :: Number}

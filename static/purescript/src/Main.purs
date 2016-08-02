@@ -14,7 +14,7 @@ import Data.Tuple (Tuple(..))
 import Data.Functor
 import Data.Functor.Coproduct (left)
 import Halogen
-import Halogen.Util (awaitBody)
+import Halogen.Util (awaitBody, runHalogenAff)
 
 import Routing
 import Routing.Match
@@ -26,7 +26,7 @@ import Model
 import Component.Page
 
 main :: Eff (HalogenEffects (ajax :: AJAX)) Unit
-main = runAff throwException (const (pure unit)) do
+main = runHalogenAff do
   body <- awaitBody
   driver <- runUI page (parentState initialPage) body
   forkAff $ routeSignal driver

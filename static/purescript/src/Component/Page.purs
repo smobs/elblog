@@ -66,7 +66,7 @@ page =
                  , H.div [P.class_ $ Pure.u 22 24] [renderPage s]
                  , H.div [P.class_ $ Pure.u 1 24] []]]
 
-    eval :: Natural Query (PageDSL a)
+    eval :: Query ~> (PageDSL a)
     eval (Navigate p a) = do
       modify (\_ -> p)
       pure a

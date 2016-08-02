@@ -29,5 +29,5 @@ about = component {render, eval}
                            ]
                          ]
 
-              eval :: Natural Query (ComponentDSL State Query g)
-              eval (Noop a) = return a
+              eval :: Query ~> (ComponentDSL State Query g)
+              eval (Noop a) = pure a

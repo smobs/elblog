@@ -46,7 +46,7 @@ gulp.task('bundle', ['psc-bundle'], function (){
   return gulp.src(pscBundle)
     .pipe(webpack({
       resolve: {moduleDirectories: ["node_modules"]},
-      output: {filename: "bundle.js"}
+      output: {filename: "index.js"}
     }))
     .pipe(gulp.dest("static/dist"));
 });

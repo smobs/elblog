@@ -15,6 +15,7 @@ import Text.Markdown.SlamDown.Halogen.Component
 import Text.Markdown.SlamDown.Parser
 
 import Data.Maybe (Maybe(..))
+import Data.Either(Either(..))
 
 import Model
 
@@ -55,13 +56,16 @@ article = parentComponent {render, eval, peek: Nothing}
       then
         [ title
         , H.div [P.class_ $ Pure.u 1 1] [H.slot MarkdownSlot \_ ->
-                                                      { initialState: replaceDocument (parseMd state.contents) emptySlamDownState
+                                                      { initialState: (case (parseMd state.contents) of
+                                                           Right slam -> replaceDocument slam
+                                                           Left _ -> id)
+                                                           emptySlamDownState
                                                       , component: slamDownComponent {browserFeatures: defaultBrowserFeatures, formName: "article-markdown-form"}}]
         ]
       else
          [title]
 
-  eval ::  Natural Query (ArticleDSL g)
+  eval ::  Query ~> (ArticleDSL g)
   eval (Toggle next) = do
     modify (\(Article s)-> Article (s {visible = not s.visible}))
     pure next

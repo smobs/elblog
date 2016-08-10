@@ -21,11 +21,10 @@ window.onload = function () {
     pongButton.textContent = text;
     pongButton.onclick = function () {
       state = Pong.sendCommand(command)(state);
-      render();
     };
     document.body.appendChild(pongButton);
   };
-
+  
   const OneDown = Pong.MovePlayer.create({player: Pong.One.value, move: Pong.Down.value});
   addButton("P1 Down", OneDown);
   const OneStop = Pong.MovePlayer.create({player: Pong.One.value, move: Pong.Stop.value});
@@ -42,6 +41,11 @@ window.onload = function () {
 
   const StepGame = Pong.Step.value;
   addButton("Step", StepGame);
+
+  window.setInterval(function () {
+      state = Pong.sendCommand(StepGame)(state);
+      render();
+    }, 1000);
   
 };
 

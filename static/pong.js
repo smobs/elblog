@@ -45,7 +45,7 @@ window.onload = function () {
   window.setInterval(function () {
       state = Pong.sendCommand(StepGame)(state);
       render();
-    }, 1000);
+    }, 100);
   
 };
 

@@ -25,18 +25,18 @@ window.onload = function () {
     document.body.appendChild(pongButton);
   };
   
-  const OneDown = Pong.MovePlayer.create({player: Pong.One.value, move: Pong.Down.value});
+  const OneDown = Pong.MovePlayer.create({player: Pong.One.value, move: Pong.Direction.create(Pong.Down.value)});
   addButton("P1 Down", OneDown);
   const OneStop = Pong.MovePlayer.create({player: Pong.One.value, move: Pong.Stop.value});
   addButton("P1 Stop", OneStop);
 
-  const OneUp = Pong.MovePlayer.create({player: Pong.One.value, move: Pong.Up.value});
+  const OneUp = Pong.MovePlayer.create({player: Pong.One.value, move: Pong.Direction.create(Pong.Up.value)});
   addButton("P1 Up", OneUp);
-  const TwoDown = Pong.MovePlayer.create({player: Pong.Two.value, move: Pong.Down.value});
+  const TwoDown = Pong.MovePlayer.create({player: Pong.Two.value, move: Pong.Direction.create(Pong.Down.value)});
   addButton("P2 Down", TwoDown);
   const TwoStop = Pong.MovePlayer.create({player: Pong.Two.value, move: Pong.Stop.value});
   addButton("P2 Stop", TwoStop);
-  const TwoUp = Pong.MovePlayer.create({player: Pong.Two.value, move: Pong.Up.value});
+  const TwoUp = Pong.MovePlayer.create({player: Pong.Two.value, move: Pong.Direction.create(Pong.Up.value)});
   addButton("P2 Up", TwoUp);
 
   const StepGame = Pong.Step.value;

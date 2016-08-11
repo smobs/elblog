@@ -2,6 +2,7 @@ module Pong where
 
 import Prelude
 import CSS (green)
+import Control.Category ((<<<))
 import Control.Monad.Eff (Eff)
 import Data.Maybe (Maybe(..))
 import Graphics.Canvas (clearRect, getContext2D, getCanvasElementById, CANVAS)
@@ -17,14 +18,27 @@ data BallDir = BallDir DirX DirY
 
 newtype PongState = PongState { p1 :: BatState
                               , p2 :: BatState
-                              , ball :: BallState}
+                              , ball :: BallState
+                              , score :: {one :: Int, two :: Int}}
 
 data Player = One | Two
 data Move = Direction DirY | Stop
 data PongCommand = MovePlayer {player :: Player, move :: Move} | Step
 
+newRound :: forall t10.                    
+  t10
+  -> { p1 :: BatState
+     , p2 :: BatState                 
+     , ball :: BallState               
+     , score :: t10       
+     }                         
+newRound score = { p1: {pos:0.0, dir: Stop}
+                 , p2: {pos:0.0, dir: Stop}
+                 , ball: {x: 10.0, y: 10.0, dir: BallDir Right Down}
+                 , score: score}
+
 initial :: PongState
-initial = PongState {p1: {pos:0.0, dir: Stop}, p2: {pos:0.0, dir: Stop}, ball: {x: 10.0, y: 10.0, dir: BallDir Right Down}}
+initial = PongState  (newRound {one: 0, two: 0})
 
 sendCommand :: PongCommand -> PongState -> PongState
 sendCommand (MovePlayer {player, move}) (PongState s) = PongState (
@@ -33,11 +47,46 @@ sendCommand (MovePlayer {player, move}) (PongState s) = PongState (
      Two -> s {p2 = s.p2 {dir = move}})
 
 sendCommand Step (PongState s) = PongState (
-  s { p1 = updateBat s.p1
+  updateScore (s { p1 = updateBat s.p1
     , p2 = updateBat s.p2
-    , ball = updateBall s})
+    , ball = updateBall s}))
 
 
+updateScore :: { ball :: { x :: Number      
+          , y :: Number      
+          , dir :: BallDir   
+          }                  
+, score :: { one :: Int      
+           , two :: Int      
+           }                 
+, p1 :: { pos :: Number      
+        , dir :: Move        
+        }                    
+, p2 :: { pos :: Number      
+        , dir :: Move        
+        }                    
+}                            
+-> { p1 :: { pos :: Number   
+           , dir :: Move     
+           }                 
+   , p2 :: { pos :: Number   
+           , dir :: Move     
+           }                 
+   , ball :: { x :: Number   
+             , y :: Number   
+             , dir :: BallDir
+             }               
+   , score :: { one :: Int   
+              , two :: Int   
+              }              
+   }                         
+updateScore s
+  | s.ball.x + ballSize.w > canvasSize.w = newRound { one: s.score.one + 1
+                                                    , two: s.score.two}
+  | s.ball.x < 0.0 = newRound {one: s.score.one
+                            , two: s.score.two + 1}
+  | otherwise = s
+    
 updateBall :: forall g .     
   { ball :: BallState
   , p1 :: BatState

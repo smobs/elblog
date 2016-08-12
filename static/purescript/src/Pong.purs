@@ -134,7 +134,7 @@ updateBat bs@{pos, dir} =
     Direction Up -> bs {pos = pos - s}
     Direction Down -> bs {pos = pos + s}
     
-renderPong :: String -> PongState -> Eff (canvas :: CANVAS) Unit
+renderPong :: forall eff. String -> PongState -> Eff (canvas :: CANVAS | eff) Unit
 renderPong id (PongState s) =  do
   mCanvas <- getCanvasElementById id
   case mCanvas of

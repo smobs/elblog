@@ -13,7 +13,7 @@ window.onload = function () {
   var render = function() {
     console.log('rendering...');
     Pong.renderPong(cId)(state)();
-    console.log(state.score.one + ':' state.score.two)
+    console.log(state.score.one + ":" + state.score.two);
     console.log('done');
   };
   render();

@@ -1,22 +1,21 @@
 module Component.Pong where 
 
 import Prelude
-import Halogen
-import Data.Int
-import Graphics.Canvas
-import Graphics.Drawing
-import Control.Monad.Eff
-import Control.Monad.Eff.Class
+import Halogen (ComponentDSL, ComponentHTML, Component, HalogenEffects, action, lifecycleComponent, liftH, get, modify)
+import Data.Int (ceil)
 import Halogen.HTML.Events.Indexed as E
 import Halogen.HTML.Indexed as H
 import Halogen.HTML.Properties.Indexed as P
+import Control.Monad.Eff.Class (class MonadEff, liftEff)
 import Data.Maybe (Maybe(..))
-import Halogen.HTML.Core (className)
+import Graphics.Canvas (CANVAS)
+import Pong (PongState, DirY(..), Move(..), Player(..), PongCommand(..), renderPong, sendCommand, initialPongState)
 
-type State = {p1 :: Number, p2 :: Number, bx :: Number, by :: Number, bdirX :: Number, bdirY :: Number}
+
+type State = PongState
 
 initial :: State
-initial = {p1: 0.0, p2: 0.0, bx: 40.0, by: 40.0, bdirX: 1.0, bdirY: 1.0}
+initial = initialPongState
 
 data Query a = NewGame a | Move a
 
@@ -37,28 +36,15 @@ game = lifecycleComponent {render, eval, initializer: Just (action NewGame), fin
               eval :: Query ~> (ComponentDSL State Query g)
               eval (NewGame a) = do
                 s <- get 
-                liftH <<< liftEff $ draw s
+                liftH <<< liftEff $ renderPong canvasName s
                 pure a
               eval (Move a) = do
-                modify (\s -> s {p1 = s.p1 + 1.0})
+                modify (sendCommand (MovePlayer { player: One
+                                                , move: Direction Down}))
                 s <- get
-                liftH <<< liftEff $ draw s
+                liftH <<< liftEff $ renderPong canvasName s
                 pure a
                 
-
-draw :: State -> forall eff. Eff (canvas :: CANVAS | eff) Unit
-draw s = do
-  mCanvas <- getCanvasElementById canvasName
-  case mCanvas of
-    Just canvas -> do
-      ctx <- getContext2D canvas
-      clearRect ctx {x: 0.0, y: 0.0, w: canvasSize.w, h: canvasSize.h} 
-      render ctx $
-        filled (fillColor black) (rectangle 0.0 s.p1 batSize.w batSize.h)
-      render ctx $
-        filled (fillColor black) (rectangle (canvasSize.w - batSize.w) s.p1 batSize.w batSize.h)
-      pure unit
-    Nothing -> pure unit
 
 canvasName :: String
 canvasName = "Foo"

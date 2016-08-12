@@ -9,7 +9,7 @@ window.onload = function () {
   console.log('hello');
   document.body.appendChild(canvas);
 
-  var state = Pong.initial;
+  var state = Pong.initialPongState;
   var render = function() {
     console.log('rendering...');
     Pong.renderPong(cId)(state)();

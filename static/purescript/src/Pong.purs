@@ -37,8 +37,8 @@ newRound score = { p1: {pos:0.0, dir: Stop}
                  , ball: {x: 10.0, y: 10.0, dir: BallDir Right Down}
                  , score: score}
 
-initial :: PongState
-initial = PongState  (newRound {one: 0, two: 0})
+initialPongState :: PongState
+initialPongState = PongState  (newRound {one: 0, two: 0})
 
 sendCommand :: PongCommand -> PongState -> PongState
 sendCommand (MovePlayer {player, move}) (PongState s) = PongState (

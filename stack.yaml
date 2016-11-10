@@ -2,4 +2,11 @@ flags: {}
 packages:
 - 'server'
 extra-deps: []
-resolver: nightly-2016-05-27
+resolver: lts-7.8
+
+image: 
+  container: 
+    name: smobs/elblog
+    base: fpco/stack-run
+    add:
+      static: /static/dist

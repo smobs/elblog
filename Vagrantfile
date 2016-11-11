@@ -75,8 +75,10 @@ Vagrant.configure("2") do |config|
 
     sudo apt-get update
     sudo apt-get install stack -y
-    stack setup
-   SHELL
+    pushd /vagrant/
+    stack setup --allow-different-user
+    popd
+  SHELL
 
   config.vm.provision "docker",
                       images: ["fpco/stack-build:lts-7.8",

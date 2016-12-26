@@ -11,7 +11,7 @@ import Data.Int (ceil)
 import Data.Maybe (Maybe(..))
 import Graphics.Canvas (CANVAS)
 import Halogen (ComponentDSL, ComponentHTML, Component, HalogenEffects, action, lifecycleComponent, liftH, get, modify)
-import Pong (PongState, DirY(..), Move(..), Player(..), PongCommand(..), renderPong, sendCommand, initialPongState)
+import Pong (sendCommand, PongState, DirY(..), Move(..), Player(..), PongCommand(..), renderPong, initialPongState)
 
 
 type State = { pong :: PongState, loop :: Maybe Interval}
@@ -56,7 +56,9 @@ game = lifecycleComponent {render, eval, initializer: Just (action NewGame), fin
                     pure a
                   Nothing -> pure a
                 pure a
-                
+              eval (StepGame a) = do
+                modify (\s -> s {pong = sendCommand Step s.pong})
+                pure a
 
 canvasName :: String
 canvasName = "Foo"

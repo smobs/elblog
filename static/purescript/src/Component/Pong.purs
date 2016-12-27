@@ -71,6 +71,7 @@ canvasSize = {h: 300.0, w: 500.0}
 batSize :: Dimension
 batSize = {h: 70.0, w: 10.0}
 
-startLoop :: forall eff. Eff (timer :: TIMER | eff) Interval
-startLoop = interval 1000 $ do 
+startLoop :: forall eff. Eff (HalogenEffects(PongEffects  eff)) Interval
+startLoop = interval 1000 $ do
+  -- TODO Work out how to dispatch
   pure unit

@@ -1,31 +1,26 @@
 module Main where
 
-import Prelude
+import Prelude (Unit, bind, (<$), (<*), (<<<), ($))
 
-import Control.Apply
 import Control.Alt ((<|>))
-import Control.Monad.Aff (runAff, forkAff, Aff(..))
+import Control.Monad.Aff (forkAff, Aff)
 import Control.Monad.Eff (Eff())
-import Control.Monad.Eff.Exception (throwException)
 
 
-import Data.Maybe (Maybe(..))
+import Data.Maybe (Maybe)
 import Data.Tuple (Tuple(..))
-import Data.Functor
 import Data.Functor.Coproduct (left)
-import Halogen
+import Halogen (HalogenEffects, Driver, action, parentState, runUI)
 import Halogen.Util (awaitBody, runHalogenAff)
 
-import Routing
-import Routing.Match
-import Routing.Match.Class
+import Routing (matchesAff)
+import Routing.Match (Match)
+import Routing.Match.Class (lit)
 
-import Network.HTTP.Affjax (AJAX())
-
-import Model
+import Model (Page(..), initialPage)
 import Component.Page
 
-main :: Eff (HalogenEffects (ajax :: AJAX)) Unit
+main :: Eff (HalogenEffects (PageEffects ())) Unit
 main = runHalogenAff do
   body <- awaitBody
   driver <- runUI page (parentState initialPage) body
@@ -44,4 +39,5 @@ redirects d _ = d  <<< left <<< action <<< Navigate
 
 routing :: Match Page
 routing = AboutPage <$ lit "" <* lit "about"
+          <|> PongPage <$ lit "" <* lit "pong"
           <|> BlogPage <$ lit ""

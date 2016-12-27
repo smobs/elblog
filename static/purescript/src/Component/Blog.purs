@@ -29,7 +29,7 @@ derive instance articleSlot :: Generic ArticleSlot
 instance eqArticleSlot :: Eq ArticleSlot where eq = gEq
 instance ordArticleSlot :: Ord ArticleSlot where compare = gCompare
 
-type BlogEffects eff = HalogenEffects(ajax :: AJAX | eff)
+type BlogEffects eff = (ajax :: AJAX | eff)
 
 type State = Blog
 data Query a =
@@ -40,7 +40,7 @@ type FQuery = Coproduct Query (ChildF ArticleSlot Article.FQuery)
 type BlogDSL g = ParentDSL State (Article.FState g) Query Article.FQuery g ArticleSlot
 type BlogHTML g = ParentHTML (Article.FState g) Query Article.FQuery g ArticleSlot
 -- | The component definition9
-blog :: forall a eff. (Functor a, MonadAff (BlogEffects eff) a) =>  Component (FState a) FQuery a
+blog :: forall a eff. (Functor a, MonadAff (HalogenEffects(BlogEffects eff)) a) =>  Component (FState a) FQuery a
 blog = lifecycleParentComponent {render, eval, peek: Nothing, initializer: Just (action Load), finalizer: Nothing}
   where
     render :: State -> BlogHTML a

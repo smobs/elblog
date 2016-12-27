@@ -1,3 +1,2 @@
-const Main = require("./purescript/src/Main")
-
-Main.main()
+const Main = require("./purescript/src/Main.purs")
+Main.main(); 

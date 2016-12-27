@@ -7,7 +7,7 @@ import Data.Foreign.Class
 
 type ArticleId = Int
 
-data Page = BlogPage  | AboutPage
+data Page = BlogPage  | AboutPage | PongPage
 
 type Blog = {articles :: Array {title :: String, contents :: String, id :: ArticleId}}
 

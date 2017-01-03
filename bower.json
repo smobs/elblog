@@ -27,6 +27,7 @@
     "purescript-canvas": "^1.0",
     "purescript-drawing": "^1.0.0",
     "purescript-integers": "^1.1",
-    "purescript-timers": "https://github.com/smobs/purescript-timers.git#master"
+    "purescript-timers": "https://github.com/smobs/purescript-timers.git#master",
+    "EaselJS": "^0.8.2"
   }
 }

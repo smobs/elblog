@@ -6,9 +6,11 @@
     "virtual-dom": "^2.1.1"
   },
   "devDependencies": {
+    "exports-loader": "^0.6.3",
     "gulp": "^3.9.1",
     "gulp-bower": "0.0.13",
     "gulp-purescript": "^1.0.0",
+    "imports-loader": "^0.7.0",
     "purescript": "^0.9.3",
     "purescript-psa": "^0.3.9",
     "purs-loader": "^2.0.0-rc.1",
@@ -18,13 +20,14 @@
     "webpack-stream": "^3.2.0",
     "webpack-validator": "^2.2.3"
   },
-  "scripts" : {
+  "scripts": {
     "webpack": "webpack --progress --bail",
     "webpack:debug": "DEBUG=purs-loader webpack --progress",
     "webpack:watch": "webpack --progress --watch",
     "webpack:watch:debug": "DEBUG=purs-loader webpack --progress --watch",
     "webpack:server": "webpack-dev-server --progress --inline --hot",
     "webpack:server:debug": "DEBUG=purs-loader webpack-dev-server --progress --inline --hot",
-    "psc:server": "psc-ide-server --debug" },
+    "psc:server": "psc-ide-server --debug"
+  },
   "author": "smobs"
 }

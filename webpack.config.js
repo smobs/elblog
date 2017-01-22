@@ -8,7 +8,7 @@ const config =
                        , port: 4008
                        , stats: 'errors-only'
                      }
-        , entry: './static/pong'
+        , entry: './static/entry'
         , output: {path: path.join(__dirname, "static/dist")
                    , pathinfo: true
                    , filename: "bundle.js"

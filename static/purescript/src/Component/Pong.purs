@@ -81,7 +81,9 @@ lookupCommand c | c == 83.0 = Just $ MovePlayer { player: One, move: Direction D
                 | c == 38.0 = Just $ MovePlayer { player: Two, move: Direction Up}
                 | otherwise = Nothing
 renderGameInfo :: PongState -> ComponentHTML Query 
-renderGameInfo (PongState {score:{one, two} }) = H.div [] [H.text (show one <> " : " <> show two) ]
+renderGameInfo (PongState {score:{one, two} }) = H.div [] [ H.text (show one <> " : " <> show two) 
+                                                          , H.p [] [H.text "Player One: 'w' and 's' keys"]
+                                                          , H.p [] [H.text "Player Two: 'up' and 'down' keys"]]
 
 canvasName :: String
 canvasName = "Foo"

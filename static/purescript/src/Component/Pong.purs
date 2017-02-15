@@ -3,14 +3,15 @@ module Component.Pong where
 import Halogen.HTML.Events.Indexed as E
 import Halogen.HTML.Indexed as H
 import Halogen.HTML.Properties.Indexed as P
-import CSS (a)
+
 import Control.Monad.Aff.Free (class Affable)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Class (class MonadEff, liftEff)
 import Control.Monad.Eff.Console (CONSOLE, log)
 import Control.Monad.Eff.Timer (clearInterval, interval, Interval, TIMER)
-import DOM.HTML.HTMLElement (offsetHeight)
+
 import Data.Boolean (otherwise)
+import Data.Eq ((==))
 import Data.Int (ceil)
 import Data.Maybe (Maybe(..))
 import Data.Semigroup ((<>))
@@ -18,7 +19,7 @@ import Graphics.Canvas (CANVAS)
 import Halogen (ComponentDSL, ComponentHTML, Component, HalogenEffects, action, lifecycleComponent, liftH, get, modify, subscribe, eventSource_, EventSource)
 import Halogen.HTML.Properties (pixels)
 import Pong (sendCommand, PongState(..), DirY(..), Move(..), Player(..), PongCommand(..), renderPong, initialPongState)
-import Prelude (class Monad, type (~>), Unit, bind, pure, show, void, ($), (+), (<<<))
+import Prelude (class Monad, type (~>), Unit, bind, pure, show, void, ($), (<<<))
 
 
 type State = { pong :: PongState, loop :: Maybe Interval}
@@ -74,8 +75,11 @@ game = lifecycleComponent {render, eval, initializer: Just (action NewGame), fin
                 pure a
 
 lookupCommand :: KeyCode -> Maybe PongCommand
-lookupCommand c | otherwise = Just $ MovePlayer { player: One, move: Direction Down}
-
+lookupCommand c | c == 83.0 = Just $ MovePlayer { player: One, move: Direction Down}
+                | c == 87.0 = Just $ MovePlayer { player: One, move: Direction Up}
+                | c == 40.0 = Just $ MovePlayer { player: Two, move: Direction Down}
+                | c == 38.0 = Just $ MovePlayer { player: Two, move: Direction Up}
+                | otherwise = Nothing
 renderGameInfo :: PongState -> ComponentHTML Query 
 renderGameInfo (PongState {score:{one, two} }) = H.div [] [H.text (show one <> " : " <> show two) ]
 
@@ -91,7 +95,7 @@ batSize :: Dimension
 batSize = {h: 70.0, w: 10.0}
 
 loop :: forall eff . Eff (timer :: TIMER | eff) Unit -> Eff (timer:: TIMER | eff) Unit   
-loop a = let x = void $ interval 100 a in
+loop a = let x = void $ interval 50 a in
   x
 
 stepper ::  forall g eff. (Monad g, Affable (HalogenEffects(PongEffects eff)) g) => EventSource Query g

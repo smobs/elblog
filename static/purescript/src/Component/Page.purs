@@ -11,6 +11,7 @@ import Halogen.HTML.CSS.PureCSS as Pure
 import Halogen.Component.ChildPath (ChildPath(), cpL, cpR, (:>))
 
 import Control.Monad.Aff.Class
+import Control.Monad.Aff.Free
 
 import Data.Maybe (Maybe(Nothing))
 import Data.Either (Either(..))
@@ -63,7 +64,7 @@ type FQuery = Coproduct Query (ChildF ChildSlot ChildQuery)
 type PageDSL g = ParentDSL State (ChildState g) Query ChildQuery g ChildSlot
 type PageHTML g = ParentHTML (ChildState g) Query ChildQuery g ChildSlot
 
-page :: forall a eff . (Functor a, MonadAff (HalogenEffects(PageEffects eff)) a) => Component (FState a) FQuery a
+page :: forall a eff . (Functor a, MonadAff (HalogenEffects(PageEffects eff)) a, Affable (HalogenEffects(PageEffects eff)) a) => Component (FState a) FQuery a
 page =
   parentComponent {render, eval, peek: Nothing}
   where

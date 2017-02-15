@@ -1,5 +1,22 @@
-const Pong = require("./purescript/src/Pong.purs")
+const createJS = require('EaselJS');
+const Pong = require("./purescript/src/Pong.purs");
+
 window.onload = function () {
+  const canvas = document.createElement('canvas');
+  const cId = 'Foo';
+  canvas.id = cId;
+  canvas.width = Pong.canvasSize.w;
+  canvas.height = Pong.canvasSize.h;
+  document.body.appendChild(canvas);
+  
+  const stage = new createjs.Stage(cId);
+  var shape = new createjs.Shape();
+  shape.graphics.beginFill('red').drawRect(0, 0, 120, 120);
+  stage.addChild(shape);
+  stage.update();
+}
+
+foo = function () {
   const canvas = document.createElement('canvas');
   const cId = 'Foo';
   canvas.id = cId;

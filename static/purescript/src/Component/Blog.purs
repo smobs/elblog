@@ -17,6 +17,7 @@ import Control.Monad.Aff.Class
 import Control.Monad.Aff.Free
 import Network.HTTP.Affjax (AJAX())
 import Network.HTTP.Affjax as Ajax
+import Control.Monad.Except(runExcept)
 
 import Data.Foreign
 import Data.Foreign.Class
@@ -69,7 +70,7 @@ getBlogs =
   do
     resp <- Ajax.get url
     pure case
-      readJSON resp.response :: F (Array Article)
+      runExcept $ readJSON resp.response :: F (Array Article)
       of
         Right ids -> ids
         Left err -> [Article {title: "ERROR", contents: show err, visible: true, id: -1}]

@@ -7,6 +7,7 @@ import Halogen.HTML.Core (className)
 import Halogen.HTML.Indexed as H
 import Halogen.HTML.Events.Indexed as E
 import Halogen.HTML.Properties.Indexed as P
+import Halogen.HTML.Properties (pixels)
 
 type State = Unit
 
@@ -18,7 +19,7 @@ about = component {render, eval}
               render :: State -> ComponentHTML Query
               render _ = H.div_
                          [ H.h2_ [H.text "Me"]
-                         , H.img [P.src "/static/resources/me.jpg", P.height $ P.Pixels 200]
+                         , H.img [P.src "/static/resources/me.jpg", P.height $ pixels 200]
                          ,  H.h2_ [H.text "Source"]
                          , H.div_
                            [ H.a

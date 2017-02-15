@@ -27,9 +27,10 @@
     "purescript-drawing": "^2.0.0",
     "purescript-integers": "^2.1.0",
     "purescript-timers": "https://github.com/smobs/purescript-timers.git#master",
-    "EaselJS": "^0.8.2"
+    "purescript-aff-free": "^3.0.0",
+    "purescript-webgl": "^1.3.0"
   },
   "devDependencies": {
-    "purescript-psci-support":"^2.0.0"
+    "purescript-psci-support": "^2.0.0"
   }
 }

@@ -8,7 +8,7 @@ import Control.Monad.Aff.Free (class Affable)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Class (class MonadEff, liftEff)
 import Control.Monad.Eff.Console (CONSOLE, log)
-import Control.Monad.Eff.Timer (clearInterval, interval, Interval, TIMER)
+import Control.Monad.Eff.Timer (clearInterval, setInterval, IntervalId, TIMER)
 
 import Data.Boolean (otherwise)
 import Data.Eq ((==))
@@ -22,7 +22,7 @@ import Pong (sendCommand, PongState(..), DirY(..), Move(..), Player(..), PongCom
 import Prelude (class Monad, type (~>), Unit, bind, pure, show, void, ($), (<<<))
 
 
-type State = { pong :: PongState, loop :: Maybe Interval}
+type State = { pong :: PongState, loop :: Maybe IntervalId}
 
 initial :: State
 initial = {pong: initialPongState, loop: Nothing}
@@ -97,7 +97,7 @@ batSize :: Dimension
 batSize = {h: 70.0, w: 10.0}
 
 loop :: forall eff . Eff (timer :: TIMER | eff) Unit -> Eff (timer:: TIMER | eff) Unit   
-loop a = let x = void $ interval 50 a in
+loop a = let x = void $ setInterval 50 a in
   x
 
 stepper ::  forall g eff. (Monad g, Affable (HalogenEffects(PongEffects eff)) g) => EventSource Query g

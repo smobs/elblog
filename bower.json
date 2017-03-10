@@ -32,6 +32,8 @@
     "purescript-subscriber": "^2.0.0"
   },
   "devDependencies": {
-    "purescript-psci-support": "^2.0.0"
+    "purescript-psci-support": "^2.0.0",
+    "purescript-servant-support": "^7.0.0",
+    "purescript-argonaut-generic-codecs": "^5.0.0"
   }
 }

@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE DeriveGeneric         #-}
 module PSApp where
 
 import           Prelude                     hiding (head)
@@ -6,8 +7,9 @@ import           Servant.HTML.Blaze
 import           Text.Blaze
 import           Text.Blaze.Html5
 import           Text.Blaze.Html5.Attributes
+import           GHC.Generics                       (Generic)
 
-data PSApp = PSApp FilePath
+data PSApp = PSApp FilePath deriving (Generic, Show, Eq, Ord)
 
 instance ToMarkup PSApp where
     toMarkup  = psPage

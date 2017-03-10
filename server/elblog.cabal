@@ -15,13 +15,15 @@ cabal-version:       >=1.10
 
 library
   hs-source-dirs:      src
-  exposed-modules:     PSApp, System.BlogRepository
+  exposed-modules:     PSApp, System.BlogRepository, WebApi
   build-depends:       base >= 4.7 && < 5
                      , blaze-html
                      , blaze-markup
                      , filepath
                      , servant-blaze
                      , directory
+                     , servant-server
+                     , servant-subscriber
 
   default-language:    Haskell2010
 
@@ -41,6 +43,7 @@ executable elblog-server
                      , servant
                      , servant-docs
                      , servant-server
+                     , servant-subscriber
                      , servant-blaze
                      , text
                      , time
@@ -49,7 +52,21 @@ executable elblog-server
                      , wai
                      , warp
   default-language:    Haskell2010
-
+executable psgen
+  hs-source-dirs: psgen
+  main-is:        Main.hs
+  build-depends:  base
+                , aeson
+                , containers
+                , elblog
+                , text
+                , purescript-bridge
+                , servant
+                , servant-server
+                , servant-purescript
+                , servant-subscriber
+                , lens
+  default-language: Haskell2010
 test-suite elblog-test
   type:                exitcode-stdio-1.0
   hs-source-dirs:      test

@@ -1,5 +1,10 @@
 flags: {}
 packages:
 - 'server'
-extra-deps: []
+extra-deps:
+- purescript-bridge-0.8.0.0
+- wai-websockets-3.0.1.1
+- websockets-0.10.0.0
+- servant-subscriber-0.6.0.0
+- servant-purescript-0.7.0.0
 resolver: nightly-2016-05-27

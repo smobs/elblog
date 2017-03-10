@@ -9,10 +9,12 @@ import           Data.Maybe               (fromMaybe)
 import           Network.Wai
 import           Network.Wai.Handler.Warp
 import           PSApp
+import           WebApi
 import           Servant
 import           Servant.HTML.Blaze
 import           System.BlogRepository
 import           System.Environment
+import           Servant.Subscriber.Subscribable
 
 main :: IO ()
 main = do
@@ -24,12 +26,6 @@ app = serve siteAPI server
 
 instance ToJSON Blog
 
-type BlogApi = "api" :> "blogs" :> Get '[JSON] [Blog]
-
-type HomeApi = Get '[HTML] PSApp
-
-type SiteApi = HomeApi :<|> BlogApi :<|> "static" :> Raw
-
 server ::  Server SiteApi
 server = return (PSApp "static")
          :<|> blogHandler
@@ -38,8 +34,7 @@ server = return (PSApp "static")
 blogHandler :: Server BlogApi
 blogHandler  = liftIO $ serveBlogs "blog"
 
-siteAPI :: Proxy SiteApi
-siteAPI = Proxy
+
 
 port :: IO Int
 port = do

@@ -23,15 +23,17 @@ import Control.Monad.Eff.Ref (REF)
 import Control.Monad.Except (runExceptT)
 import Control.Monad.Reader (runReaderT)
 import Data.Either (Either(..))
-import Data.Function ((<<<))
+import Data.Function (const, (<<<))
 import Data.Generic (gCompare, gShow)
 import Data.Maybe (Maybe(..), maybe, maybe')
 import Data.Monoid (append)
 import Data.NaturalTransformation (type (~>))
+import Data.Semigroup ((<>))
+import Data.String (take)
 import Halogen (Component, ComponentDSL, ComponentHTML, EventSource, HalogenEffects, action, eventSource, liftH, modify, subscribe)
 import Halogen.Component (lifecycleComponent)
 import Halogen.HTML.Events (onChange)
-import Halogen.HTML.Events.Indexed (input_, onClick)
+import Halogen.HTML.Events.Indexed (input_, onClick, onInput, onKeyPress, onSubmit)
 import Halogen.HTML.Indexed (button, input, textarea)
 import Halogen.Query (get, set)
 import Network.HTTP.Affjax (AJAX)
@@ -53,15 +55,31 @@ data Query a = Connect a | Disconnect a | UpdateText String a | SendMessage a | 
 
 type Effects  eff = (ajax :: AJAX, channel :: CHANNEL, ref :: REF, ws :: WEBSOCKET | eff)
 
+onlyForKey :: forall props g ev.                       
+  (Functor g) => Number                      
+                   -> ({ "keyCode" :: Number  
+                       | props                  
+                       }                      
+                       -> g (Maybe ev)     
+                      )                       
+                      -> { "keyCode" :: Number
+                         | props                
+                         }
+                         -> g (Maybe ev)
+onlyForKey i input  = (\ (a@{keyCode}) -> (if keyCode == 13.0 then id else const Nothing) <$> input a)
 
 chat :: forall g eff. (Monad g, Affable (HalogenEffects(Effects eff)) g, MonadAff (HalogenEffects(Effects eff)) g) => Component State Query g 
 chat = lifecycleComponent {render, eval, initializer: Just (action Connect), finalizer: Just (action Disconnect)}
         where 
               render :: State -> ComponentHTML Query
               render {text, cur} = H.div_ $ 
-                append [ H.input [P.value cur, E.onValueChange (E.input UpdateCurrent)] 
-                       , H.button [E.onClick (E.input_ SendMessage)] [H.text "Send"]]
-                $ (\t -> H.div_ [H.text t]) <$> text
+                    append [ H.input [ P.value cur
+                                     , E.onValueInput (E.input UpdateCurrent)
+                                     , E.onKeyPress  (onlyForKey 13.0 (E.input_ SendMessage))
+                                     ]
+                            , H.button [E.onClick (E.input_ SendMessage)] [H.text "Send"]]
+                        $ (\t -> H.div_ [H.text t]) <$> text
+
               eval :: Query ~> (ComponentDSL State Query g)
               eval (Connect a) = do 
                 subscribe chatMessages

@@ -8,7 +8,6 @@ import Halogen.HTML.Properties.Indexed as P
 import Servant.Subscriber as Subscribe
 import Signal.Channel as Chan
 import WebAPI.Subscriber as Sub
-import CSS.Transform (offset)
 import Control.Category ((<<<))
 import Control.Monad (class Monad, pure, bind)
 import Control.Monad.Aff.Free (class Affable)
@@ -16,16 +15,17 @@ import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Class (class MonadEff)
 import Control.Monad.Eff.Exception (EXCEPTION)
 import Control.Monad.Eff.Ref (REF)
-import Control.Monad.Eff.Var (class Updatable)
 import Control.Monad.Reader (runReaderT)
 import Data.Function ((<<<))
 import Data.Generic (gCompare, gShow)
 import Data.Maybe (Maybe(..), maybe, maybe')
+import Data.Monoid (append)
 import Data.NaturalTransformation (type (~>))
-import Halogen (Component, ComponentDSL, ComponentHTML, EventSource, HalogenEffects, action, eventSource, subscribe)
+import Halogen (Component, ComponentDSL, ComponentHTML, EventSource, HalogenEffects, action, eventSource, subscribe, modify)
 import Halogen.Component (lifecycleComponent)
-import Halogen.Query (set)
-import Network.HTTP.Affjax (AJAX, get)
+import Halogen.HTML.Events (onChange)
+import Halogen.HTML.Indexed (input, textarea)
+import Network.HTTP.Affjax (AJAX)
 import Servant.Subscriber (Subscriber, SubscriberEff, makeSubscriber)
 import Servant.Subscriber.Connection (Config)
 import Signal (Signal, runSignal)
@@ -33,10 +33,10 @@ import Signal.Channel (Channel, send, channel, CHANNEL)
 import WebAPI.Subscriber (getGame)
 import WebSocket (WEBSOCKET)
 
-type State = {text :: String}
+type State = {cur :: String , text :: Array String}
 
 initial :: State
-initial = {text: "Sup?"}
+initial = {cur: "", text: []}
 
 data Query a = Connect a | Disconnect a | UpdateText String a 
 
@@ -47,14 +47,14 @@ chat :: forall g eff. (Monad g, Affable (HalogenEffects(Effects eff)) g, MonadEf
 chat = lifecycleComponent {render, eval, initializer: Just (action Connect), finalizer: Just (action Disconnect)}
         where 
               render :: State -> ComponentHTML Query
-              render {text} = H.text text
+              render {text, cur} = H.div_ $ append [H.input []] $ (\t -> H.div_ [H.text t]) <$> text
               eval :: Query ~> (ComponentDSL State Query g)
               eval (Connect a) = do 
                 subscribe chatMessages
                 pure a
               eval (Disconnect a) = pure a
               eval (UpdateText t a) = do
-                set {text: t}
+                modify (\s ->  s {text= append [t] s.text})
                 pure a
 
 data Action = Update String

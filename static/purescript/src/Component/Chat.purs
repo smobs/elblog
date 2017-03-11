@@ -2,32 +2,43 @@ module Component.Chat where
 
 import Prelude
 import WebAPI.Settings
+import WebAPI
 import Halogen.HTML.Events.Indexed as E
 import Halogen.HTML.Indexed as H
 import Halogen.HTML.Properties.Indexed as P
 import Servant.Subscriber as Subscribe
 import Signal.Channel as Chan
 import WebAPI.Subscriber as Sub
+import CSS.Transform (offset)
 import Control.Category ((<<<))
 import Control.Monad (class Monad, pure, bind)
+import Control.Monad.Aff (Aff)
+import Control.Monad.Aff.Class (class MonadAff, liftAff)
+import Control.Monad.Aff.Console (error)
 import Control.Monad.Aff.Free (class Affable)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Class (class MonadEff)
 import Control.Monad.Eff.Exception (EXCEPTION)
 import Control.Monad.Eff.Ref (REF)
+import Control.Monad.Except (runExceptT)
 import Control.Monad.Reader (runReaderT)
+import Data.Either (Either(..))
 import Data.Function ((<<<))
 import Data.Generic (gCompare, gShow)
 import Data.Maybe (Maybe(..), maybe, maybe')
 import Data.Monoid (append)
 import Data.NaturalTransformation (type (~>))
-import Halogen (Component, ComponentDSL, ComponentHTML, EventSource, HalogenEffects, action, eventSource, subscribe, modify)
+import Halogen (Component, ComponentDSL, ComponentHTML, EventSource, HalogenEffects, action, eventSource, liftH, modify, subscribe)
 import Halogen.Component (lifecycleComponent)
 import Halogen.HTML.Events (onChange)
-import Halogen.HTML.Indexed (input, textarea)
+import Halogen.HTML.Events.Indexed (input_, onClick)
+import Halogen.HTML.Indexed (button, input, textarea)
+import Halogen.Query (get, set)
 import Network.HTTP.Affjax (AJAX)
+import Servant.PureScript.Affjax (errorToString)
 import Servant.Subscriber (Subscriber, SubscriberEff, makeSubscriber)
 import Servant.Subscriber.Connection (Config)
+import Servant.Subscriber.Internal (doCallback)
 import Signal (Signal, runSignal)
 import Signal.Channel (Channel, send, channel, CHANNEL)
 import WebAPI.Subscriber (getGame)
@@ -38,16 +49,19 @@ type State = {cur :: String , text :: Array String}
 initial :: State
 initial = {cur: "", text: []}
 
-data Query a = Connect a | Disconnect a | UpdateText String a 
+data Query a = Connect a | Disconnect a | UpdateText String a | SendMessage a | UpdateCurrent String a
 
 type Effects  eff = (ajax :: AJAX, channel :: CHANNEL, ref :: REF, ws :: WEBSOCKET | eff)
 
 
-chat :: forall g eff. (Monad g, Affable (HalogenEffects(Effects eff)) g, MonadEff (HalogenEffects(Effects eff)) g) => Component State Query g 
+chat :: forall g eff. (Monad g, Affable (HalogenEffects(Effects eff)) g, MonadAff (HalogenEffects(Effects eff)) g) => Component State Query g 
 chat = lifecycleComponent {render, eval, initializer: Just (action Connect), finalizer: Just (action Disconnect)}
         where 
               render :: State -> ComponentHTML Query
-              render {text, cur} = H.div_ $ append [H.input []] $ (\t -> H.div_ [H.text t]) <$> text
+              render {text, cur} = H.div_ $ 
+                append [ H.input [P.value cur, E.onValueChange (E.input UpdateCurrent)] 
+                       , H.button [E.onClick (E.input_ SendMessage)] [H.text "Send"]]
+                $ (\t -> H.div_ [H.text t]) <$> text
               eval :: Query ~> (ComponentDSL State Query g)
               eval (Connect a) = do 
                 subscribe chatMessages
@@ -55,6 +69,17 @@ chat = lifecycleComponent {render, eval, initializer: Just (action Connect), fin
               eval (Disconnect a) = pure a
               eval (UpdateText t a) = do
                 modify (\s ->  s {text= append [t] s.text})
+                pure a
+              eval (SendMessage a) = do
+                st <- get
+                merr <- liftH <<< liftAff $ sendMessage st.cur
+                case merr of
+                    Just err -> do modify (\s ->  s {text= append [err] s.text})
+                                   pure a
+                    Nothing -> do set {cur: "", text: st.text}
+                                  pure a
+              eval (UpdateCurrent s a) = do
+                modify (\st -> st {cur = s})
                 pure a
 
 data Action = Update String
@@ -119,3 +144,10 @@ chatMessages = eventSource callback (\a -> case a of
         where 
             f x = pure $ action x
 
+
+sendMessage :: forall eff. String -> Aff (ajax :: AJAX | eff) (Maybe String)
+sendMessage s = do
+    ebs <- runExceptT $ runReaderT (postGame s) settings
+    pure $ case ebs of
+        Left err -> Just $ errorToString err
+        _ -> Nothing

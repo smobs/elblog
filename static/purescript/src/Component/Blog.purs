@@ -20,8 +20,10 @@ import Data.Maybe (Maybe(..))
 import Network.HTTP.Affjax (AJAX)
 import Servant.PureScript.Affjax (errorToString)
 import Servant.PureScript.Settings (SPSettings_(..))
-import ServerAPI (getApiBlogs, SPParams_(..))
+import WebAPI (getApiBlogs, SPParams_(..))
 import System.BlogRepository (Blog(..))
+import WebAPI.Settings
+
 newtype ArticleSlot = ArticleSlot ArticleId
 
 derive instance articleSlot :: Generic ArticleSlot
@@ -72,12 +74,4 @@ getBlogs = do
 convert :: Blog -> Article
 convert (Blog {id, title, content}) = initialArticle id title content
 
-settings :: SPSettings_ SPParams_
-settings =  SPSettings_ { 
-                    encodeJson : encodeJson
-                  , decodeJson : decodeJson
-                  , toURLPiece : gShow
-                  , params : SPParams_ {
-                      baseURL : "http://localhost:8080/"
-                  }}
 

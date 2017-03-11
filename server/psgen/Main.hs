@@ -60,5 +60,5 @@ mySettings = (defaultSettings & apiModuleName .~ "WebAPI") {
 main :: IO ()
 main = do
   let frontEndRoot = "static/purescript/generated"
-  writeAPIModule frontEndRoot myBridgeProxy appAPI
+  writeAPIModuleWithSettings mySettings frontEndRoot myBridgeProxy appAPI
   writePSTypes frontEndRoot (buildBridge myBridge) myTypes

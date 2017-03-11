@@ -35,7 +35,7 @@ app sd = serve siteAPI (server sd)
 instance ToJSON Blog
 
 gameHandler :: ServerT GameApi GameHandler
-gameHandler = pure ["Hello tokens"]
+gameHandler = pure "Hello tokens"
 
 apiHandler :: ServerData -> Server AppApi
 apiHandler sd = blogHandler

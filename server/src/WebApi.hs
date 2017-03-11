@@ -10,15 +10,16 @@ import PSApp
 import Servant.HTML.Blaze
 
 type BlogApi = "api" :> "blogs" :> Get '[JSON] [Blog]
-
 type HomeApi = Get '[HTML] PSApp
-
-blogAPI :: Proxy BlogApi
-blogAPI = Proxy
-
-type SiteApi = HomeApi :<|> BlogApi :<|> "static" :> Raw
-
 type GameApi = "game" :> Subscribable :> Get '[JSON] [String]
+
+type AppApi = BlogApi
+
+appAPI :: Proxy AppApi
+appAPI = Proxy
+
+type SiteApi = HomeApi :<|> AppApi :<|> "static" :> Raw
+
 
 siteAPI :: Proxy SiteApi
 siteAPI = Proxy

@@ -36,7 +36,7 @@ fixTypesModule = do
   TypeInfo (_typePackage t) "Counter.ServerTypes" (_typeName t) <$> psTypeParameters
 
 myBridge :: BridgePart
-myBridge = defaultBridge <|> fixTypesModule
+myBridge = defaultBridge 
 
 data MyBridge
 
@@ -60,5 +60,5 @@ mySettings = (defaultSettings & apiModuleName .~ "WebAPI") {
 main :: IO ()
 main = do
   let frontEndRoot = "static/purescript/generated"
-  writeAPIModule frontEndRoot myBridgeProxy blogAPI
+  writeAPIModule frontEndRoot myBridgeProxy appAPI
   writePSTypes frontEndRoot (buildBridge myBridge) myTypes

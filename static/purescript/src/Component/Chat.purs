@@ -82,9 +82,9 @@ initSubscriber = do
   --pongReq <- flip runReaderT settings $ MakeReq.putCounter (CounterAdd 1) -- | Let's play a bit! :-)
   -- closeReq <- flip runReaderT settings $ MakeReq.putCounter (CounterSet 100)
   subs <- flip runReaderT settings $ Sub.getGame (maybe (ReportError) Update)
-  let c = Subscribe.getConnection sub
- -- C.setPongRequest pongReq c -- |< Hihi :-)
- -- C.setCloseRequest closeReq c
+  let conn = Subscribe.getConnection sub
+ -- C.setPongRequest pongReq conn -- |< Hihi :-)
+ -- C.setCloseRequest closeReq conn
   Subscribe.deploy subs sub
   pure $ { subscriber : sub, messages : sig }
 

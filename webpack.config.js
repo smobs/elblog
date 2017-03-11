@@ -15,7 +15,7 @@ const config =
                   }
         , module: { loaders: [ { test: /\.purs$/
                            , loader: 'purs-loader'
-                           , query: { src: [ 'bower_components/purescript-*/src/**/*.purs', 'static/purescript/src/**/*.purs' ]
+                           , query: { src: [ 'bower_components/purescript-*/src/**/*.purs', 'static/purescript/src/**/*.purs', 'static/purescript/generated/**/*.purs' ]
                                     , bundle: false
                                     , psc: 'node_modules/purescript/bin/psc.js'
                                     , pscBundle: 'node_modules/purescript/bin/psc-bundle.js'

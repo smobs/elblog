@@ -39,12 +39,14 @@ executable elblog-server
                      , directory
                      , http-types
                      , js-jquery
+                     , monad-logger
                      , random
                      , servant
                      , servant-docs
                      , servant-server
                      , servant-subscriber
                      , servant-blaze
+                     , stm
                      , text
                      , time
                      , transformers

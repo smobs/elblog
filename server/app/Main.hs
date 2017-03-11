@@ -1,21 +1,24 @@
 {-# LANGUAGE DataKinds     #-}
 {-# LANGUAGE TypeOperators #-}
-
+{-# LANGUAGE OverloadedStrings     #-}
 module Main where
 
 import           Control.Monad.IO.Class   (liftIO)
 import           Control.Monad.Trans.Reader
+import           Control.Monad.Logger               (runStderrLoggingT)
 import           Data.Aeson
 import           Data.Maybe               (fromMaybe)
 import           Network.Wai
 import           Network.Wai.Handler.Warp
 import           PSApp
 import           WebApi
+import           Control.Concurrent.STM
 import           Servant
 import           Servant.HTML.Blaze
 import           System.BlogRepository
 import           System.Environment
 import           Servant.Subscriber.Subscribable
+import           Servant.Subscriber
 
 type ServerData = String
 
@@ -27,10 +30,11 @@ transformGameHandler sd = runReaderTNat sd
 main :: IO ()
 main = do
   p <- port
-  run p (app "Wonderbar")
+  cd <- atomically (makeSubscriber "subscriber" runStderrLoggingT)
+  run p $ app "Wonderbar" cd
 
-app :: ServerData -> Application
-app sd = serve siteAPI (server sd)
+app :: ServerData -> Subscriber SiteApi -> Application
+app sd sub = serveSubscriber sub (server sd)
 
 instance ToJSON Blog
 

@@ -2,32 +2,24 @@ module Component.Blog where
 
 import Prelude
 import Halogen
-import Model
-import Control.Monad.Aff
-import Control.Monad.Aff.Class
-import Control.Monad.Aff.Free
-import Control.Monad.Except.Trans
-import Control.Monad.Reader.Trans
-import Data.Argonaut.Generic.Aeson
-import Data.Generic
-import Data.Foreign
-import Data.Foreign.Class
+import Model (Article(..), ArticleId, BlogState, initialArticle)
+import Control.Monad.Aff (Aff)
+import Control.Monad.Aff.Class (class MonadAff, liftAff)
+
+import Control.Monad.Except.Trans (runExceptT)
+import Control.Monad.Reader.Trans (runReaderT)
+import Data.Argonaut.Generic.Aeson (decodeJson, encodeJson)
+import Data.Generic (class Generic, gCompare, gEq, gShow)
 import Component.Article as Article
 import Halogen.HTML.Indexed as H
 import Halogen.HTML.Properties.Indexed as P
-import Network.HTTP.Affjax as Ajax
-import CSS.Transform (offset)
 import Component.Article (article)
-import Control.Monad.Except (runExcept)
-import DOM.HTML.HTMLTemplateElement (content)
 import Data.Either (Either(..))
 import Data.Functor.Coproduct (Coproduct)
-import Data.Generic (class Generic, gEq, gCompare)
 import Data.Maybe (Maybe(..))
 import Network.HTTP.Affjax (AJAX)
 import Servant.PureScript.Affjax (errorToString)
 import Servant.PureScript.Settings (SPSettings_(..))
-import Servant.Subscriber.Internal (doCallback)
 import ServerAPI (getApiBlogs, SPParams_(..))
 import System.BlogRepository (Blog(..))
 newtype ArticleSlot = ArticleSlot ArticleId

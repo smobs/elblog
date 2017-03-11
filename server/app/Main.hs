@@ -21,9 +21,8 @@ import           System.Environment
 import           Servant.Subscriber.Subscribable
 import           Servant.Subscriber
 
-data ServerData = ServerData {
-  messageRef :: IORef String
-}
+data ServerData = ServerData { messageRef :: IORef String 
+                             , subscriber :: Subscriber SiteApi}
 
 type GameHandler = (ReaderT ServerData Handler) 
 
@@ -35,7 +34,7 @@ main = do
   p <- port
   cd <- atomically (makeSubscriber "subscriber" runStderrLoggingT)
   ref <- newIORef "Wonderbar"
-  run p $ app (ServerData ref) cd
+  run p $ app (ServerData ref cd) cd
 
 app :: ServerData -> Subscriber SiteApi -> Application
 app sd sub = serveSubscriber sub (server sd)
@@ -43,7 +42,17 @@ app sd sub = serveSubscriber sub (server sd)
 instance ToJSON Blog
 
 postGameHandler :: String -> ReaderT ServerData Handler ()
-postGameHandler s = pure ()
+postGameHandler s = do
+  r <- liftIO . flip atomicModifyIORef' (doAction s) =<< (messageRef <$> ask)
+
+  subscriber' <- (subscriber <$> ask)
+  let link :: Proxy ("game" :>  Get '[JSON] String)
+      link = Proxy
+  liftIO . atomically $ notify subscriber' ModifyEvent link id
+  pure ()
+  where
+    doAction s _ = (s, s)
+
 
 getGameHandler :: ReaderT ServerData Handler String
 getGameHandler = do 

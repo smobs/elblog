@@ -9,14 +9,14 @@ type ArticleId = Int
 
 data Page = BlogPage  | AboutPage | PongPage
 
-type Blog = {articles :: Array {title :: String, contents :: String, id :: ArticleId}}
+type BlogState = {articles :: Array {title :: String, contents :: String, id :: ArticleId}}
 
 data Article = Article {contents :: String, visible :: Boolean, title :: String, id :: ArticleId}
 
 initialPage :: Page
 initialPage = BlogPage
 
-initialBlog :: Blog
+initialBlog :: BlogState
 initialBlog = {articles : []}
 
 initialArticle :: ArticleId -> String -> String -> Article

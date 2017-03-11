@@ -17,11 +17,11 @@
     "purescript-eff": "^2.0.0",
     "purescript-generics": "^3.0.0",
     "purescript-affjax": "^3.0.2",
-    "purescript-foldable-traversable": "^2.0.0",
+    "purescript-foldable-traversable": "~2.1.0",
     "purescript-markdown-halogen": "^3.0.0",
     "purescript-markdown": "^8.0.0",
     "purescript-halogen-css": "^4.0.0",
-    "purescript-routing": "^3.0.0",
+    "purescript-routing": "~3.0.0",
     "purescript-tuples": "^3.0",
     "purescript-canvas": "^2.0",
     "purescript-drawing": "^2.0.0",
@@ -33,7 +33,7 @@
   },
   "devDependencies": {
     "purescript-psci-support": "^2.0.0",
-    "purescript-servant-support": "^7.0.0",
-    "purescript-argonaut-generic-codecs": "^5.0.0"
+    "purescript-servant-support": "^6.0.0",
+    "purescript-argonaut-generic-codecs": "^4.0.0"
   }
 }

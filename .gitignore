@@ -17,3 +17,5 @@ pom.xml.asc
 *.class
 /.lein-*
 /.nrepl-port
+
+/static/purescript/generated

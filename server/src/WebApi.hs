@@ -13,7 +13,7 @@ type BlogApi = "api" :> "blogs" :> Get '[JSON] [Blog]
 type HomeApi = Get '[HTML] PSApp
 type GameApi = "game" :> Subscribable :> Get '[JSON] [String]
 
-type AppApi = BlogApi
+type AppApi = BlogApi :<|> GameApi
 
 appAPI :: Proxy AppApi
 appAPI = Proxy

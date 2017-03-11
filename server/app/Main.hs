@@ -4,6 +4,7 @@
 module Main where
 
 import           Control.Monad.IO.Class   (liftIO)
+import           Control.Monad.Trans.Reader
 import           Data.Aeson
 import           Data.Maybe               (fromMaybe)
 import           Network.Wai
@@ -16,19 +17,33 @@ import           System.BlogRepository
 import           System.Environment
 import           Servant.Subscriber.Subscribable
 
+type ServerData = String
+
+type GameHandler = ReaderT ServerData Handler 
+
+transformGameHandler :: ServerData -> (GameHandler :~> Handler)
+transformGameHandler sd = runReaderTNat sd
+
 main :: IO ()
 main = do
   p <- port
-  run p app
+  run p (app "Wonderbar")
 
-app :: Application
-app = serve siteAPI server
+app :: ServerData -> Application
+app sd = serve siteAPI (server sd)
 
 instance ToJSON Blog
 
-server ::  Server SiteApi
-server = return (PSApp "static")
-         :<|> blogHandler
+gameHandler :: ServerT GameApi GameHandler
+gameHandler = pure ["Hello tokens"]
+
+apiHandler :: ServerData -> Server AppApi
+apiHandler sd = blogHandler
+                 :<|> (enter (transformGameHandler sd) gameHandler)
+
+server ::  ServerData -> Server SiteApi
+server sd = return (PSApp "static")
+         :<|> (apiHandler sd)
          :<|> serveDirectory "static/dist/"
 
 blogHandler :: Server BlogApi

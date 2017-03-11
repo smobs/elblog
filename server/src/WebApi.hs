@@ -11,7 +11,8 @@ import Servant.HTML.Blaze
 
 type BlogApi = "api" :> "blogs" :> Get '[JSON] [Blog]
 type HomeApi = Get '[HTML] PSApp
-type GameApi = "game" :> Subscribable :> Get '[JSON] String
+type GameApi = "game" :> (Subscribable :> Get '[JSON] String
+                :<|> ReqBody '[JSON] String :> Post '[JSON] ())
 
 type AppApi = BlogApi :<|> GameApi
 

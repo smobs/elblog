@@ -38,9 +38,13 @@ app sd sub = serveSubscriber sub (server sd)
 
 instance ToJSON Blog
 
+postGameHandler :: String -> ReaderT ServerData Handler ()
+postGameHandler s = pure ()
+
 gameHandler :: ServerT GameApi GameHandler
 gameHandler = pure "Hello tokens"
-
+              :<|> postGameHandler
+ 
 apiHandler :: ServerData -> Server AppApi
 apiHandler sd = blogHandler
                  :<|> (enter (transformGameHandler sd) gameHandler)

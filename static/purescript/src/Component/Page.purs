@@ -1,33 +1,41 @@
 module Component.Page where
 
 import Prelude
-
 import Halogen
-import Halogen.HTML.Indexed as H
-import Halogen.HTML.Properties.Indexed as P
-import Halogen.HTML.Core (className, ClassName)
-import Halogen.HTML.CSS.PureCSS as Pure
-
-import Halogen.Component.ChildPath (ChildPath(), cpL, cpR, (:>))
-
 import Control.Monad.Aff.Class
 import Control.Monad.Aff.Free
-
-import Data.Maybe (Maybe(Nothing))
-import Data.Either (Either(..))
-import Data.Functor.Coproduct (Coproduct())
 import Data.Tuple
-
-import HTML.Components as C
-
-import Component.Blog as Blog
-import Component.About as About
-import Component.Pong as Pong
-
 import Model
+import Component.About as About
+import Component.Blog as Blog
+import Component.Chat as Chat
+import Component.Pong as Pong
+import HTML.Components as C
+import Halogen.HTML.CSS.PureCSS as Pure
+import Halogen.HTML.Indexed as H
+import Halogen.HTML.Properties.Indexed as P
+import Component.Chat (chat)
+import Control.Monad.Aff.Console (CONSOLE)
+import Control.Monad.Eff.Ref (REF)
+import Control.Monad.Eff.Timer (TIMER)
+import Data.Either (Either(..))
+import Data.Functor.Coproduct (Coproduct)
+import Data.Maybe (Maybe(Nothing))
+import Graphics.Canvas (CANVAS)
+import Halogen.Component.ChildPath (ChildPath, cpL, cpR, (:>))
+import Halogen.HTML.Core (className, ClassName)
+import Network.HTTP.Affjax (AJAX)
+import Signal.Channel (CHANNEL)
+import WebSocket (WEBSOCKET)
 
 type State = Page
-type PageEffects a = Pong.PongEffects(Blog.BlogEffects a)
+type PageEffects a =  ( channel :: CHANNEL
+                      , "ref" :: REF
+                      , "ws" :: WEBSOCKET
+                      , ajax :: AJAX
+                      , canvas :: CANVAS
+                      , console :: CONSOLE
+                      , timer :: TIMER | a)
 
 data Query a =
   Navigate Page a
@@ -54,10 +62,16 @@ instance ordPongSlot :: Ord PongSlot where
 instance eqPongSlot :: Eq PongSlot where
   eq _ _ = true
 
+data ChatSlot = ChatSlot
+instance ordChatSlot :: Ord ChatSlot where
+  compare _ _ = EQ
 
-type ChildState g = Either (Blog.FState g) (Either About.State Pong.State)
-type ChildQuery = Coproduct (Blog.FQuery) (Coproduct About.Query Pong.Query)
-type ChildSlot = Either BlogSlot (Either AboutSlot PongSlot)
+instance eqChatSlot :: Eq ChatSlot where
+  eq _ _ = true
+
+type ChildState g = Either (Blog.FState g) (Either About.State (Either Pong.State Chat.State))
+type ChildQuery = Coproduct (Blog.FQuery) (Coproduct About.Query (Coproduct Pong.Query Chat.Query))
+type ChildSlot = Either BlogSlot (Either AboutSlot (Either PongSlot ChatSlot))
 
 type FState g = ParentState State (ChildState g) Query ChildQuery g ChildSlot
 type FQuery = Coproduct Query (ChildF ChildSlot ChildQuery)
@@ -85,6 +99,7 @@ page =
     renderPage BlogPage = H.slot' pathToBlog BlogSlot (\_ -> {initialState: parentState initialBlog, component: Blog.blog})
     renderPage AboutPage = H.slot' pathToAbout AboutSlot (\_ -> {initialState: unit, component: About.about})
     renderPage PongPage = H.slot' pathToPong PongSlot (\_ -> {initialState: Pong.initial, component: Pong.game})
+    renderPage ChatPage = H.slot' pathToChat ChatSlot (\_ -> {initialState: Chat.initial, component: Chat.chat})
     
     pathToBlog :: ChildPath (Blog.FState a) (ChildState a) Blog.FQuery ChildQuery BlogSlot ChildSlot
     pathToBlog = cpL
@@ -93,10 +108,14 @@ page =
     pathToAbout = cpR :> cpL
 
     pathToPong :: ChildPath Pong.State (ChildState a) Pong.Query ChildQuery PongSlot ChildSlot
-    pathToPong = cpR :> cpR
-    
+    pathToPong = cpR :> cpR :> cpL
+
+    pathToChat :: ChildPath Chat.State (ChildState a) Chat.Query ChildQuery ChatSlot ChildSlot
+    pathToChat = cpR :> cpR :> cpR
+
     renderLinks :: forall p i . HTML p i
     renderLinks = C.nav "TOBY'S BLOG"
                   [ Tuple "PONG" "/#/pong"
+                  , Tuple "CHAT" "/#/chat"
                   , Tuple "ABOUT" "/#/about"
                   ]

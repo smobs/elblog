@@ -1,9 +1,7 @@
-const validate = require("webpack-validator");
 const path = require('path');
 const webpack = require('webpack');
 const config = 
-      { debug: true
-        , devtool: 'source-map'
+      {  devtool: 'source-map'
         , devServer: { contentBase: '.'
                        , port: 4008
                        , stats: 'errors-only'
@@ -13,7 +11,7 @@ const config =
                    , pathinfo: true
                    , filename: "bundle.js"
                   }
-        , module: { loaders: [ { test: /\.purs$/
+        , module: { rules: [ { test: /\.purs$/
                            , loader: 'purs-loader'
                            , query: { src: [ 'bower_components/purescript-*/src/**/*.purs', 'static/purescript/src/**/*.purs', 'static/purescript/generated/**/*.purs' ]
                                     , bundle: false
@@ -32,16 +30,7 @@ const config =
                            }
                          ]
                   }
-        , plugins: [
-          // This will tell Webpack how to find the main file of bower modules
-          new webpack.ResolverPlugin(
-            new webpack.ResolverPlugin.DirectoryDescriptionFilePlugin('.bower.json', ['main'])
-          )
-        ]
-        , resolve: { modulesDirectories: ['node_modules', 'bower_components'],
-                     extensions: ['', '.js','.purs']
-        }
 };
 
-module.exports = validate(config);
+module.exports = config;
     

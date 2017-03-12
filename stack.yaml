@@ -7,4 +7,8 @@ extra-deps:
 - websockets-0.10.0.0
 - servant-subscriber-0.6.0.0
 - servant-purescript-0.7.0.0
-resolver: nightly-2016-05-27
+resolver: lts-8.5
+docker:
+  enable: false
+  require-docker-version: "> 17.0"
+  stack-exe: image

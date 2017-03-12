@@ -98,7 +98,7 @@ chat = lifecycleComponent {render, eval, initializer: Just (action Connect), fin
                 case merr of
                     Just err -> do modify (\s ->  s {text= append [err] s.text})
                                    pure a
-                    Nothing -> do set {cur: "", text: st.text, sub: st.sub}
+                    Nothing -> do modify (\s -> s {cur = ""})
                                   pure a
               eval (UpdateCurrent s a) = do
                 modify (\st -> st {cur = s})

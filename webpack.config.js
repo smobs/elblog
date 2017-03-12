@@ -36,6 +36,12 @@ const config =
                               use: [ { loader: "css-loader"
                                      , options: { sourceMap: true }}
                                    ]})}
+                       , { test: /\.jpg$/
+                         , use: [{ loader: "url-loader"
+                                 , options: { name: "[name].[ext]"
+                                            , publicPath: "static/resources/"
+                                            , outputPath: "resources/"
+                                            , limit: 10000}}]}
                        ]
                 }
       ,  plugins: [ new ExtractTextPlugin({filename: './style.css'})]

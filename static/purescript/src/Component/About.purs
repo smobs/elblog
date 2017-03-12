@@ -9,6 +9,8 @@ import Halogen.HTML.Events.Indexed as E
 import Halogen.HTML.Properties.Indexed as P
 import Halogen.HTML.Properties (pixels)
 
+foreign import mePic :: String
+
 type State = Unit
 
 data Query a = Noop a
@@ -19,7 +21,7 @@ about = component {render, eval}
               render :: State -> ComponentHTML Query
               render _ = H.div_
                          [ H.h2_ [H.text "Me"]
-                         , H.img [P.src "/static/resources/me.jpg", P.height $ pixels 200]
+                         , H.img [P.src mePic, P.height $ pixels 200]
                          ,  H.h2_ [H.text "Source"]
                          , H.div_
                            [ H.a

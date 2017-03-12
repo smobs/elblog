@@ -33,6 +33,7 @@
     "webpack:server": "webpack-dev-server --progress --inline --hot",
     "webpack:server:debug": "DEBUG=purs-loader webpack-dev-server --progress --inline --hot",
     "psc:server": "psc-ide-server --debug",
+    "heroku-prebuild": "psgen",
     "heroku-postbuild": "bower install && webpack -p --progress"
   },
   "author": "smobs"

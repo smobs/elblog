@@ -3,6 +3,9 @@
     "NODE_ENV": "prod",
     "NPM_CONFIG_PRODUCTION": "false"
   },
+  "scripts": {
+    "postdeploy": "psgen && npm run build"
+  },
   "buildpacks": [
     {
       "url": "https://github.com/heroku/heroku-buildpack-nodejs"

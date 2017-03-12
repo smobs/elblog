@@ -1,5 +1,6 @@
 const path = require('path');
 const webpack = require('webpack');
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
 
 const ignorePaths = /node_modules|bower_components/
 const config = 
@@ -29,9 +30,16 @@ const config =
                          , loader: 'babel-loader'
                          , exclude: ignorePaths
                          , options: {presets: ['es2015']}
-                         }
+                        }
+                       , { test: /\.css$/
+                         , use: ExtractTextPlugin.extract({
+                              use: [ { loader: "css-loader"
+                                     , options: { sourceMap: true }}
+                                   ]})}
                        ]
                 }
+      ,  plugins: [ new ExtractTextPlugin({filename: './style.css'})]
+                
 };
 
 module.exports = config;

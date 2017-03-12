@@ -26,4 +26,4 @@ psImport :: PSApp -> Html
 psImport  (PSApp l) = script "" ! src  (stringValue $ l ++ "/bundle.js" ) ! type_ "text/javascript"
 
 psCss :: Html
-psCss = link ! rel "stylesheet" ! href "static/css/pure.css"
+psCss = link ! rel "stylesheet" ! href "static/style.css"

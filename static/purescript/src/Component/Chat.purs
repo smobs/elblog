@@ -17,7 +17,7 @@ import Control.Monad.Aff.Class (class MonadAff, liftAff)
 import Control.Monad.Aff.Console (error)
 import Control.Monad.Aff.Free (class Affable)
 import Control.Monad.Eff (Eff)
-import Control.Monad.Eff.Class (class MonadEff)
+import Control.Monad.Eff.Class (class MonadEff, liftEff)
 import Control.Monad.Eff.Exception (EXCEPTION)
 import Control.Monad.Eff.Ref (REF)
 import Control.Monad.Except (runExceptT)
@@ -46,10 +46,10 @@ import Signal.Channel (Channel, send, channel, CHANNEL)
 import WebAPI.Subscriber (getGame)
 import WebSocket (WEBSOCKET)
 
-type State = {cur :: String , text :: Array String}
+type State = {cur :: String , text :: Array String, sub :: Boolean}
 
 initial :: State
-initial = {cur: "", text: []}
+initial = {cur: "", text: [], sub: false}
 
 data Query a = Connect a | Disconnect a | UpdateText String a | SendMessage a | UpdateCurrent String a
 
@@ -72,17 +72,21 @@ chat :: forall g eff. (Monad g, Affable (HalogenEffects(Effects eff)) g, MonadAf
 chat = lifecycleComponent {render, eval, initializer: Just (action Connect), finalizer: Just (action Disconnect)}
         where 
               render :: State -> ComponentHTML Query
-              render {text, cur} = H.div_ $ 
-                    append [ H.input [ P.value cur
-                                     , E.onValueInput (E.input UpdateCurrent)
-                                     , E.onKeyPress  (onlyForKey 13.0 (E.input_ SendMessage))
-                                     ]
-                            , H.button [E.onClick (E.input_ SendMessage)] [H.text "Send"]]
+              render {text, cur, sub} = H.div_ $ 
+                    append (if not sub 
+                        then []
+                        else [ H.input [ P.value cur
+                                       , E.onValueInput (E.input UpdateCurrent)
+                                       , E.onKeyPress  (onlyForKey 13.0 (E.input_ SendMessage))
+                                       ]
+                            , H.button [E.onClick (E.input_ SendMessage)] [H.text "Send"]])
                         $ (\t -> H.div_ [H.text t]) <$> text
 
               eval :: Query ~> (ComponentDSL State Query g)
               eval (Connect a) = do 
-                subscribe chatMessages
+                sub <- liftH $ liftEff initSubscriber 
+                subscribe (chatMessages sub.messages)
+                modify (\s -> s {sub = true})
                 pure a
               eval (Disconnect a) = pure a
               eval (UpdateText t a) = do
@@ -94,7 +98,7 @@ chat = lifecycleComponent {render, eval, initializer: Just (action Connect), fin
                 case merr of
                     Just err -> do modify (\s ->  s {text= append [err] s.text})
                                    pure a
-                    Nothing -> do set {cur: "", text: st.text}
+                    Nothing -> do set {cur: "", text: st.text, sub: st.sub}
                                   pure a
               eval (UpdateCurrent s a) = do
                 modify (\st -> st {cur = s})
@@ -132,7 +136,8 @@ initSubscriber = do
   pure $ { subscriber : sub, messages : sig }
 
 
-callback :: forall eff.              
+callback :: forall eff.    
+  Signal Action ->          
   (Action -> Eff                     
        ( "ref" :: REF        
        , "ws" :: WEBSOCKET   
@@ -148,12 +153,11 @@ callback :: forall eff.
        | eff                 
        )                     
        Unit
-callback eff = do 
-    s <- initSubscriber
-    runSignal (eff <$> s.messages)
+callback sig eff = do 
+    runSignal (eff <$> sig)
 
-chatMessages ::  forall g eff. (Monad g, Affable (HalogenEffects(Effects eff)) g) => EventSource Query g
-chatMessages = eventSource callback (\a -> case a of
+chatMessages ::  forall g eff. (Monad g, Affable (HalogenEffects(Effects eff)) g) => Signal Action ->  EventSource Query g
+chatMessages sig = eventSource (callback sig) (\a -> case a of
             Update s -> f $ UpdateText s
             Nop -> f $ UpdateText "No op"
             ReportError -> f $ UpdateText "Error" 

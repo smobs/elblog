@@ -1,1 +1,1 @@
-ls /
+/app/.local/bin/psgen

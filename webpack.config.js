@@ -1,5 +1,7 @@
 const path = require('path');
 const webpack = require('webpack');
+
+const ignorePaths = /node_modules|bower_components/
 const config = 
       {  devtool: 'source-map'
         , devServer: { contentBase: '.'
@@ -13,20 +15,18 @@ const config =
                   }
         , module: { rules: [ { test: /\.purs$/
                            , loader: 'purs-loader'
-                           , query: { src: [ 'bower_components/purescript-*/src/**/*.purs', 'static/purescript/src/**/*.purs', 'static/purescript/generated/**/*.purs' ]
+                           , options: { src: [ 'bower_components/purescript-*/src/**/*.purs', 'static/purescript/src/**/*.purs', 'static/purescript/generated/**/*.purs' ]
                                     , bundle: false
                                     , psc: 'node_modules/purescript/bin/psc.js'
                                     , pscBundle: 'node_modules/purescript/bin/psc-bundle.js'
                                     , pscArgs: { sourceMaps: true }
                                     , pscIde: true
                                     }
-                               },
-                               // That will tell Webpack that EaselJS refers to `window` with `this` and exports `window.createjs`.
-                               { test: /bower_components\/EaselJS\/.*\.js$/, loader: 'imports?this=>window!exports?window.createjs' }
-                               
+                               }
+                            
                          , { test: /\.js$/
-                           , loader: 'source-map-loader'
-                           , exclude: /node_modules|bower_components/
+                           , use: 'source-map-loader'
+                           , exclude: ignorePaths
                            }
                          ]
                   }

@@ -11,4 +11,12 @@ resolver: lts-8.5
 docker:
   enable: false
   require-docker-version: "> 17.0"
-  stack-exe: image
+image:
+  containers:
+    - name: elblog
+      base: fpco/stack-run
+      add:
+        blog: /blog
+        static/dist/: /static/dist/
+      entrypoints:
+      - elblog-server

@@ -10,5 +10,5 @@ settings =  SPSettings_ {
                   , decodeJson : decodeJson
                   , toURLPiece : gShow
                   , params : SPParams_ {
-                      baseURL : "http://localhost:8080/"
+                      baseURL : ""
                   }}

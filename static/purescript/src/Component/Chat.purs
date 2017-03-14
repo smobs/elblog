@@ -51,7 +51,7 @@ type State = {cur :: String , text :: Array String, sub :: Boolean}
 initial :: State
 initial = {cur: "", text: [], sub: false}
 
-data Query a = Connect a | Disconnect a | UpdateText String a | SendMessage a | UpdateCurrent String a
+data Query a = Connect a | Disconnect a | UpdateText (Array String) a | SendMessage a | UpdateCurrent String a
 
 type Effects  eff = (ajax :: AJAX, channel :: CHANNEL, ref :: REF, ws :: WEBSOCKET | eff)
 
@@ -90,7 +90,7 @@ chat = lifecycleComponent {render, eval, initializer: Just (action Connect), fin
                 pure a
               eval (Disconnect a) = pure a
               eval (UpdateText t a) = do
-                modify (\s ->  s {text= append [t] s.text})
+                modify (\s ->  s {text= t})
                 pure a
               eval (SendMessage a) = do
                 st <- get
@@ -104,7 +104,7 @@ chat = lifecycleComponent {render, eval, initializer: Just (action Connect), fin
                 modify (\st -> st {cur = s})
                 pure a
 
-data Action = Update String
+data Action = Update (Array String)
             | ReportError 
             | SubscriberLog String
             | Nop
@@ -159,9 +159,9 @@ callback sig eff = do
 chatMessages ::  forall g eff. (Monad g, Affable (HalogenEffects(Effects eff)) g) => Signal Action ->  EventSource Query g
 chatMessages sig = eventSource (callback sig) (\a -> case a of
             Update s -> f $ UpdateText s
-            Nop -> f $ UpdateText "No op"
-            ReportError -> f $ UpdateText "Error" 
-            SubscriberLog s -> f $ UpdateText s
+            Nop -> f $ UpdateText ["No op"]
+            ReportError -> f $ UpdateText ["Error"]
+            SubscriberLog s -> f $ UpdateText [s]
         )
         where 
             f x = pure $ action x

@@ -21,7 +21,7 @@ import           System.Environment
 import           Servant.Subscriber.Subscribable
 import           Servant.Subscriber
 
-data ServerData = ServerData { messageRef :: IORef [String]
+data ServerData = ServerData { messageRef :: IORef [ChatMessage]
                              , subscriber :: Subscriber SiteApi}
 
 type GameHandler = (ReaderT ServerData Handler) 
@@ -33,20 +33,22 @@ main :: IO ()
 main = do
   p <- port
   cd <- atomically (makeSubscriber "subscriber" runStderrLoggingT)
-  ref <- newIORef ["First post!!!1!1!"]
+  ref <- newIORef [ChatMessage "System" "First post!!!1!1!"]
   run p $ app (ServerData ref cd) cd
 
 app :: ServerData -> Subscriber SiteApi -> Application
 app sd sub = serveSubscriber sub (server sd)
 
 instance ToJSON Blog
+instance ToJSON ChatMessage
 
 postGameHandler :: String -> ReaderT ServerData Handler ()
 postGameHandler s = do
-  r <- liftIO . flip atomicModifyIORef' (doAction s) =<< (messageRef <$> ask)
+  let d = ChatMessage "Anonymous" s
+  r <- liftIO . flip atomicModifyIORef' (doAction d) =<< (messageRef <$> ask)
 
   subscriber' <- (subscriber <$> ask)
-  let link :: Proxy ("game" :>  Get '[JSON] [String])
+  let link :: Proxy ("game" :>  Get '[JSON] [ChatMessage])
       link = Proxy
   liftIO . atomically $ notify subscriber' ModifyEvent link id
   pure ()
@@ -54,7 +56,7 @@ postGameHandler s = do
     doAction s ms = (take 10 $ s : ms, take 10 $ s : ms)
 
 
-getGameHandler :: ReaderT ServerData Handler [String]
+getGameHandler :: ReaderT ServerData Handler [ChatMessage]
 getGameHandler = do 
   ref <- ask
   liftIO (readIORef (messageRef ref))

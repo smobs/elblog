@@ -3,13 +3,13 @@ module Component.Chat where
 import Prelude
 import WebAPI.Settings
 import WebAPI
+import Chat.ServerTypes
 import Halogen.HTML.Events.Indexed as E
 import Halogen.HTML.Indexed as H
 import Halogen.HTML.Properties.Indexed as P
 import Servant.Subscriber as Subscribe
 import Signal.Channel as Chan
 import WebAPI.Subscriber as Sub
-import CSS.Transform (offset)
 import Control.Category ((<<<))
 import Control.Monad (class Monad, pure, bind)
 import Control.Monad.Aff (Aff)
@@ -46,12 +46,13 @@ import Signal.Channel (Channel, send, channel, CHANNEL)
 import WebAPI.Subscriber (getGame)
 import WebSocket (WEBSOCKET)
 
-type State = {cur :: String , text :: Array String, sub :: Boolean}
+
+type State = {cur :: String , text :: Array ChatMessage, sub :: Boolean}
 
 initial :: State
 initial = {cur: "", text: [], sub: false}
 
-data Query a = Connect a | Disconnect a | UpdateText (Array String) a | SendMessage a | UpdateCurrent String a
+data Query a = Connect a | Disconnect a | UpdateText (Array ChatMessage) a | SendMessage a | UpdateCurrent String a
 
 type Effects  eff = (ajax :: AJAX, channel :: CHANNEL, ref :: REF, ws :: WEBSOCKET | eff)
 
@@ -80,7 +81,7 @@ chat = lifecycleComponent {render, eval, initializer: Just (action Connect), fin
                                        , E.onKeyPress  (onlyForKey 13.0 (E.input_ SendMessage))
                                        ]
                             , H.button [E.onClick (E.input_ SendMessage)] [H.text "Send"]])
-                        $ (\t -> H.div_ [H.text t]) <$> text
+                        $ (\(ChatMessage t) -> H.div_ [H.text (t.userName <> ": " <> t.messageBody)]) <$> text
 
               eval :: Query ~> (ComponentDSL State Query g)
               eval (Connect a) = do 
@@ -96,7 +97,7 @@ chat = lifecycleComponent {render, eval, initializer: Just (action Connect), fin
                 st <- get
                 merr <- liftH <<< liftAff $ sendMessage st.cur
                 case merr of
-                    Just err -> do modify (\s ->  s {text= append [err] s.text})
+                    Just err -> do modify (\s ->  s {text= append [systemMessage err] s.text})
                                    pure a
                     Nothing -> do modify (\s -> s {cur = ""})
                                   pure a
@@ -104,7 +105,7 @@ chat = lifecycleComponent {render, eval, initializer: Just (action Connect), fin
                 modify (\st -> st {cur = s})
                 pure a
 
-data Action = Update (Array String)
+data Action = Update (Array ChatMessage)
             | ReportError 
             | SubscriberLog String
             | Nop
@@ -156,12 +157,15 @@ callback :: forall eff.
 callback sig eff = do 
     runSignal (eff <$> sig)
 
+systemMessage :: String -> ChatMessage
+systemMessage s = ChatMessage {userName: "System", messageBody: s}
+
 chatMessages ::  forall g eff. (Monad g, Affable (HalogenEffects(Effects eff)) g) => Signal Action ->  EventSource Query g
 chatMessages sig = eventSource (callback sig) (\a -> case a of
             Update s -> f $ UpdateText s
-            Nop -> f $ UpdateText ["No op"]
-            ReportError -> f $ UpdateText ["Error"]
-            SubscriberLog s -> f $ UpdateText [s]
+            Nop -> f $ UpdateText [systemMessage "No op"]
+            ReportError -> f $ UpdateText [systemMessage "Error"]
+            SubscriberLog s -> f $ UpdateText [systemMessage s]
         )
         where 
             f x = pure $ action x

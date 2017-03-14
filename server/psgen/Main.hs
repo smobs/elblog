@@ -33,10 +33,10 @@ fixTypesModule :: BridgePart
 fixTypesModule = do
   typeModule ^== "WebApi"
   t <- view haskType
-  TypeInfo (_typePackage t) "Counter.ServerTypes" (_typeName t) <$> psTypeParameters
+  TypeInfo (_typePackage t) "Chat.ServerTypes" (_typeName t) <$> psTypeParameters
 
 myBridge :: BridgePart
-myBridge = defaultBridge 
+myBridge = defaultBridge <|> fixTypesModule
 
 data MyBridge
 
@@ -50,6 +50,7 @@ myTypes :: [SumType 'Haskell]
 myTypes =  [
           mkSumType (Proxy :: Proxy Blog)
         , mkSumType (Proxy :: Proxy PSApp)
+        , mkSumType (Proxy :: Proxy ChatMessage)
           ]
 
 mySettings :: Settings

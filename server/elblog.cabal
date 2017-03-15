@@ -24,6 +24,7 @@ library
                      , directory
                      , servant-server
                      , servant-subscriber
+                     , text
 
   default-language:    Haskell2010
 

@@ -20,7 +20,7 @@ import           System.BlogRepository
 import           System.Environment
 import           Servant.Subscriber.Subscribable
 import           Servant.Subscriber
-
+import Data.Text(Text)
 data ServerData = ServerData { messageRef :: IORef [ChatMessage]
                              , subscriber :: Subscriber SiteApi}
 
@@ -42,7 +42,7 @@ app sd sub = serveSubscriber sub (server sd)
 instance ToJSON Blog
 instance ToJSON ChatMessage
 
-postGameHandler :: String -> ReaderT ServerData Handler ()
+postGameHandler :: Text -> ReaderT ServerData Handler ()
 postGameHandler s = do
   let d = ChatMessage "Anonymous" s
   r <- liftIO . flip atomicModifyIORef' (doAction d) =<< (messageRef <$> ask)

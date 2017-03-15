@@ -10,13 +10,13 @@ import System.BlogRepository
 import PSApp
 import Servant.HTML.Blaze
 import GHC.Generics
-
-data ChatMessage = ChatMessage {userName :: String, messageBody :: String } deriving (Generic, Eq, Show)
+import Data.Text (Text)
+data ChatMessage = ChatMessage {userName :: Text, messageBody :: Text } deriving (Generic, Eq, Show)
 
 type BlogApi = "api" :> "blogs" :> Get '[JSON] [Blog]
 type HomeApi = Get '[HTML] PSApp
 type GameApi = "game" :> (Subscribable :> Get '[JSON] [ChatMessage]
-                :<|> ReqBody '[JSON] String :> Post '[JSON] ())
+                :<|> ReqBody '[JSON] Text :> Post '[JSON] ())
 
 type AppApi = BlogApi :<|> GameApi
 

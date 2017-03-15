@@ -3,6 +3,7 @@
 {-# LANGUAGE OverloadedStrings     #-}
 module Main where
 
+import GHC.IO.Encoding
 import           Control.Monad.IO.Class   (liftIO)
 import           Control.Monad.Trans.Reader
 import           Control.Monad.Logger               (runStderrLoggingT)
@@ -33,6 +34,7 @@ transformGameHandler sd = runReaderTNat sd
 
 main :: IO ()
 main = do
+  setLocaleEncoding utf8
   p <- port
   cd <- atomically (makeSubscriber "subscriber" runStderrLoggingT)
   ref <- newIORef [ChatMessage "System" "First post!!!1!1!"]

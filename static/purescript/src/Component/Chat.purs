@@ -121,10 +121,9 @@ websocketUrl :: forall eff. Eff (dom :: DOM | eff) String
 websocketUrl = do
   l <- location =<< window
   h <- host l
-  prot <- protocol l
-  let p = case prot of
-            "http:" -> "ws:"
-            "https:" -> "wss:"
+  hname <- hostname l
+  let p = case hname of
+            "localhost" -> "ws:"
             _ -> "wss:"
   pure $ p <> "//"<> h
 

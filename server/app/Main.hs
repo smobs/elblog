@@ -20,13 +20,15 @@ import           System.BlogRepository
 import           System.Environment
 import           Servant.Subscriber.Subscribable
 import           Servant.Subscriber
+import Servant.PureScript (jsonParseUrlPiece, jsonParseHeader)
+
 import Data.Text(Text)
 data ServerData = ServerData { messageRef :: IORef [ChatMessage]
                              , subscriber :: Subscriber SiteApi}
 
 type GameHandler = (ReaderT ServerData Handler) 
 
-transformGameHandler :: ServerData -> (GameHandler :~> Handler)
+transformGameHandler :: ServerData ->  (GameHandler :~> Handler)
 transformGameHandler sd = runReaderTNat sd
 
 main :: IO ()
@@ -41,10 +43,15 @@ app sd sub = serveSubscriber sub (server sd)
 
 instance ToJSON Blog
 instance ToJSON ChatMessage
+instance FromJSON AuthToken
 
-postGameHandler :: Text -> ReaderT ServerData Handler ()
-postGameHandler s = do
-  let d = ChatMessage "Anonymous" s
+instance FromHttpApiData AuthToken where
+  parseUrlPiece = jsonParseUrlPiece
+  parseHeader   = jsonParseHeader
+
+postGameHandler :: Text -> Text -> ReaderT ServerData Handler ()
+postGameHandler n s = do
+  let d = ChatMessage n s
   r <- liftIO . flip atomicModifyIORef' (doAction d) =<< (messageRef <$> ask)
 
   subscriber' <- (subscriber <$> ask)
@@ -62,12 +69,18 @@ getGameHandler = do
   liftIO (readIORef (messageRef ref))
               
 
-gameHandler :: ServerT GameApi GameHandler
-gameHandler = getGameHandler :<|> postGameHandler
- 
+gameHandler :: AuthToken -> ServerT GameApi GameHandler
+gameHandler (AuthToken t) = getGameHandler :<|> (postGameHandler t)
+
+userMissingError :: Server GameApi
+userMissingError = let e = throwError $ err401 { errBody = "You have to provide a username!" }
+                   in e :<|> (\s -> e)
+
 apiHandler :: ServerData -> Server AppApi
 apiHandler sd = blogHandler
-                 :<|> (enter (transformGameHandler sd) gameHandler)
+                 :<|> (\auth -> case auth of
+                                Just a -> enter (transformGameHandler sd) $ gameHandler a
+                                Nothing -> userMissingError)
 
 server ::  ServerData -> Server SiteApi
 server sd = return (PSApp "static")

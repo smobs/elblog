@@ -50,12 +50,12 @@ import DOM.HTML
 import DOM.HTML.Window
 import DOM.HTML.Location
 
-type State = {cur :: String , text :: Array ChatMessage, sub :: Boolean}
+type State = {cur :: String , text :: Array ChatMessage, sub :: Boolean, auth :: Maybe AuthToken, login :: String}
 
 initial :: State
-initial = {cur: "", text: [], sub: false}
+initial = {cur: "", text: [], sub: false, auth: Nothing, login: ""}
 
-data Query a = Connect a | Disconnect a | UpdateText (Array ChatMessage) a | SendMessage a | UpdateCurrent String a
+data Query a = Connect a | Disconnect a | UpdateText (Array ChatMessage) a | SendMessage a | UpdateCurrent String a | SetAuth a | UpdateLogin String a
 
 type Effects  eff = (ajax :: AJAX, channel :: CHANNEL, ref :: REF, ws :: WEBSOCKET | eff)
 
@@ -76,7 +76,7 @@ chat :: forall g eff. (Monad g, Affable (HalogenEffects(Effects eff)) g, MonadAf
 chat = lifecycleComponent {render, eval, initializer: Just (action Connect), finalizer: Just (action Disconnect)}
         where 
               render :: State -> ComponentHTML Query
-              render {text, cur, sub} = H.div_ $ 
+              render {text, cur, sub, auth: Just _ } = H.div_ $ 
                     append (if not sub 
                         then []
                         else [ H.input [ P.value cur
@@ -85,27 +85,45 @@ chat = lifecycleComponent {render, eval, initializer: Just (action Connect), fin
                                        ]
                             , H.button [E.onClick (E.input_ SendMessage)] [H.text "Send"]])
                         $ (\(ChatMessage t) -> H.div_ [H.text (t.userName <> ": " <> t.messageBody)]) <$> text
-
+              render _ = H.div_ $ [ H.text "Username",  H.input [E.onValueInput (E.input UpdateLogin), E.onKeyPress  (onlyForKey 13.0 (E.input_ SetAuth))], H.button [E.onClick (E.input_ SetAuth)] [H.text "Login"] ]
               eval :: Query ~> (ComponentDSL State Query g)
-              eval (Connect a) = do 
-                sub <- liftH $ liftEff initSubscriber 
-                subscribe (chatMessages sub.messages)
-                modify (\s -> s {sub = true})
-                pure a
+              eval (Connect a) = do
+                st <- get
+                case st.auth of
+                  Nothing -> pure a
+                  Just token -> do
+                    sub <- liftH $ liftEff (initSubscriber token)
+                    subscribe (chatMessages sub.messages)
+                    modify (\s -> s {sub = true})    
+                    pure a
               eval (Disconnect a) = pure a
               eval (UpdateText t a) = do
                 modify (\s ->  s {text= t})
                 pure a
               eval (SendMessage a) = do
                 st <- get
-                merr <- liftH <<< liftAff $ sendMessage st.cur
-                case merr of
-                    Just err -> do modify (\s ->  s {text= append [systemMessage err] s.text})
-                                   pure a
-                    Nothing -> do modify (\s -> s {cur = ""})
-                                  pure a
+                case st.auth of
+                  Nothing -> pure a
+                  Just t -> do 
+                       merr <- liftH <<< liftAff $ sendMessage st.cur t
+                       case merr of
+                           Just err -> do modify (\s ->  s {text= append [systemMessage err] s.text})
+                                          pure a
+                           Nothing -> do modify (\s -> s {cur = ""})
+                                         pure a
               eval (UpdateCurrent s a) = do
                 modify (\st -> st {cur = s})
+                pure a
+              eval (UpdateLogin l a) = do
+                modify (\st -> st {login = l})
+                pure a
+              eval (SetAuth a) = do
+                st <- get
+                let t = (AuthToken st.login)
+                set $ st {auth = Just t}
+                sub <- liftH $ liftEff $ initSubscriber t 
+                subscribe (chatMessages sub.messages)
+                modify (\s -> s {sub = true})
                 pure a
 
 data Action = Update (Array ChatMessage)
@@ -127,8 +145,8 @@ websocketUrl = do
             _ -> "wss:"
   pure $ p <> "//"<> h
 
-initSubscriber :: forall eff. SubscriberEff (channel :: CHANNEL, dom ::DOM  | eff) (SubscriberData (channel :: CHANNEL, dom ::DOM | eff))
-initSubscriber = do
+initSubscriber :: forall eff. AuthToken -> SubscriberEff (channel :: CHANNEL, dom ::DOM  | eff) (SubscriberData (channel :: CHANNEL, dom ::DOM | eff))
+initSubscriber a = do
   ch <- channel Nop
   url <- websocketUrl
   let
@@ -142,7 +160,7 @@ initSubscriber = do
   let sig = Chan.subscribe ch
   --pongReq <- flip runReaderT settings $ MakeReq.putCounter (CounterAdd 1) -- | Let's play a bit! :-)
   -- closeReq <- flip runReaderT settings $ MakeReq.putCounter (CounterSet 100)
-  subs <- flip runReaderT settings $ Sub.getGame (maybe (ReportError) Update)
+  subs <- flip runReaderT settings $ Sub.getGame (maybe (ReportError) Update) a
   let conn = Subscribe.getConnection sub
  -- C.setPongRequest pongReq conn -- |< Hihi :-)
  -- C.setCloseRequest closeReq conn
@@ -186,9 +204,9 @@ chatMessages sig = eventSource (callback sig) (\a -> case a of
             f x = pure $ action x
 
 
-sendMessage :: forall eff. String -> Aff (ajax :: AJAX | eff) (Maybe String)
-sendMessage s = do
-    ebs <- runExceptT $ runReaderT (postGame s) settings
+sendMessage :: forall eff. String -> AuthToken -> Aff (ajax :: AJAX | eff) (Maybe String)
+sendMessage s a = do
+    ebs <- runExceptT $ runReaderT (postGame a s) settings
     pure $ case ebs of
         Left err -> Just $ errorToString err
         _ -> Nothing

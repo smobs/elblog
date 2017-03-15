@@ -51,6 +51,7 @@ myTypes =  [
           mkSumType (Proxy :: Proxy Blog)
         , mkSumType (Proxy :: Proxy PSApp)
         , mkSumType (Proxy :: Proxy ChatMessage)
+        , mkSumType (Proxy :: Proxy AuthToken)
           ]
 
 mySettings :: Settings

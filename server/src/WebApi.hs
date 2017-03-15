@@ -11,14 +11,17 @@ import PSApp
 import Servant.HTML.Blaze
 import GHC.Generics
 import Data.Text (Text)
+
 data ChatMessage = ChatMessage {userName :: Text, messageBody :: Text } deriving (Generic, Eq, Show)
+
+data AuthToken = AuthToken Text deriving (Generic, Eq, Show)
 
 type BlogApi = "api" :> "blogs" :> Get '[JSON] [Blog]
 type HomeApi = Get '[HTML] PSApp
 type GameApi = "game" :> (Subscribable :> Get '[JSON] [ChatMessage]
                 :<|> ReqBody '[JSON] Text :> Post '[JSON] ())
 
-type AppApi = BlogApi :<|> GameApi
+type AppApi = BlogApi :<|>  (Header "AuthToken" AuthToken :> GameApi)
 
 appAPI :: Proxy AppApi
 appAPI = Proxy

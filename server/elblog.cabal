@@ -39,6 +39,7 @@ executable elblog-server
                      , bytestring
                      , directory
                      , http-types
+                     , http-api-data
                      , js-jquery
                      , monad-logger
                      , random
@@ -47,6 +48,7 @@ executable elblog-server
                      , servant-server
                      , servant-subscriber
                      , servant-blaze
+                     , servant-purescript
                      , stm
                      , text
                      , time

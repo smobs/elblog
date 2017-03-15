@@ -45,7 +45,10 @@ import Signal (Signal, runSignal)
 import Signal.Channel (Channel, send, channel, CHANNEL)
 import WebAPI.Subscriber (getGame)
 import WebSocket (WEBSOCKET)
-
+import DOM(DOM)
+import DOM.HTML
+import DOM.HTML.Window
+import DOM.HTML.Location
 
 type State = {cur :: String , text :: Array ChatMessage, sub :: Boolean}
 
@@ -115,13 +118,14 @@ type SubscriberData eff = {
 , messages :: Signal Action
 }
 
-initSubscriber :: forall eff. SubscriberEff (channel :: CHANNEL | eff) (SubscriberData (channel :: CHANNEL | eff))
+initSubscriber :: forall eff. SubscriberEff (channel :: CHANNEL, dom ::DOM  | eff) (SubscriberData (channel :: CHANNEL, dom ::DOM | eff))
 initSubscriber = do
   ch <- channel Nop
+  url <- host =<< location =<< window
   let
-    c :: Config (channel :: CHANNEL | eff) Action
+    c :: Config (channel :: CHANNEL, dom ::DOM | eff) Action
     c = {
-        url : "ws://localhost:8080/subscriber"
+        url : "ws://"<> url <> "/subscriber"
       , notify : send ch <<< SubscriberLog <<< gShow
       , callback : send ch
       }
@@ -142,8 +146,9 @@ callback :: forall eff.
   (Action -> Eff                     
        ( "ref" :: REF        
        , "ws" :: WEBSOCKET   
-       , "err" :: EXCEPTION  
+       , "err" :: EXCEPTION 
        , "channel" :: CHANNEL
+       , dom ::DOM
        | eff                 
        ) Unit  )                        
   -> Eff                     
@@ -151,6 +156,7 @@ callback :: forall eff.
        , "ws" :: WEBSOCKET   
        , "err" :: EXCEPTION  
        , "channel" :: CHANNEL
+       , dom ::DOM
        | eff                 
        )                     
        Unit

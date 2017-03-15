@@ -117,15 +117,25 @@ type SubscriberData eff = {
   subscriber :: Subscriber eff Action
 , messages :: Signal Action
 }
+websocketUrl :: forall eff. Eff (dom :: DOM | eff) String
+websocketUrl = do
+  l <- location =<< window
+  h <- host l
+  prot <- protocol l
+  let p = case prot of
+            "http:" -> "ws:"
+            "https:" -> "wss:"
+            _ -> "wss:"
+  pure $ p <> "//"<> h
 
 initSubscriber :: forall eff. SubscriberEff (channel :: CHANNEL, dom ::DOM  | eff) (SubscriberData (channel :: CHANNEL, dom ::DOM | eff))
 initSubscriber = do
   ch <- channel Nop
-  url <- host =<< location =<< window
+  url <- websocketUrl
   let
     c :: Config (channel :: CHANNEL, dom ::DOM | eff) Action
     c = {
-        url : "ws://"<> url <> "/subscriber"
+        url : url <> "/subscriber"
       , notify : send ch <<< SubscriberLog <<< gShow
       , callback : send ch
       }

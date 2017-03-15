@@ -20,7 +20,7 @@ import Halogen (ComponentDSL, ComponentHTML, Component, HalogenEffects, action, 
 import Halogen.HTML.Properties (pixels)
 import Pong (sendCommand, PongState(..), DirY(..), Move(..), Player(..), PongCommand(..), renderPong, initialPongState)
 import Prelude (class Monad, type (~>), Unit, bind, pure, show, void, ($), (<<<))
-
+ 
 
 type State = { pong :: PongState, loop :: Maybe IntervalId}
 

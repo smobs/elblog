@@ -18,10 +18,10 @@ data AuthToken = AuthToken Text deriving (Generic, Eq, Show)
 
 type BlogApi = "api" :> "blogs" :> Get '[JSON] [Blog]
 type HomeApi = Get '[HTML] PSApp
-type GameApi = "game" :> (Subscribable :> Get '[JSON] [ChatMessage]
+type ChatApi = "chat" :> (Subscribable :> Get '[JSON] [ChatMessage]
                 :<|> ReqBody '[JSON] Text :> Post '[JSON] ())
 
-type AppApi = BlogApi :<|>  (Header "AuthToken" AuthToken :> GameApi)
+type AppApi = BlogApi :<|>  (Header "AuthToken" AuthToken :> ChatApi)
 
 appAPI :: Proxy AppApi
 appAPI = Proxy

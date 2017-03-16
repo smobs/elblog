@@ -57,7 +57,7 @@ postGameHandler n s = do
   r <- liftIO . flip atomicModifyIORef' (doAction d) =<< (messageRef <$> ask)
 
   subscriber' <- (subscriber <$> ask)
-  let link :: Proxy ("game" :>  Get '[JSON] [ChatMessage])
+  let link :: Proxy ("chat" :>  Get '[JSON] [ChatMessage])
       link = Proxy
   liftIO . atomically $ notify subscriber' ModifyEvent link id
   pure ()
@@ -71,10 +71,10 @@ getGameHandler = do
   liftIO (readIORef (messageRef ref))
               
 
-gameHandler :: AuthToken -> ServerT GameApi GameHandler
+gameHandler :: AuthToken -> ServerT ChatApi GameHandler
 gameHandler (AuthToken t) = getGameHandler :<|> (postGameHandler t)
 
-userMissingError :: Server GameApi
+userMissingError :: Server ChatApi
 userMissingError = let e = throwError $ err401 { errBody = "You have to provide a username!" }
                    in e :<|> (\s -> e)
 

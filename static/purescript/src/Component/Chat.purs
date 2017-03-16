@@ -43,7 +43,6 @@ import Servant.Subscriber.Connection (Config)
 import Servant.Subscriber.Internal (doCallback)
 import Signal (Signal, runSignal)
 import Signal.Channel (Channel, send, channel, CHANNEL)
-import WebAPI.Subscriber (getGame)
 import WebSocket (WEBSOCKET)
 import DOM(DOM)
 import DOM.HTML
@@ -160,7 +159,7 @@ initSubscriber a = do
   let sig = Chan.subscribe ch
   --pongReq <- flip runReaderT settings $ MakeReq.putCounter (CounterAdd 1) -- | Let's play a bit! :-)
   -- closeReq <- flip runReaderT settings $ MakeReq.putCounter (CounterSet 100)
-  subs <- flip runReaderT settings $ Sub.getGame (maybe (ReportError) Update) a
+  subs <- flip runReaderT settings $ Sub.getChat (maybe (ReportError) Update) a
   let conn = Subscribe.getConnection sub
  -- C.setPongRequest pongReq conn -- |< Hihi :-)
  -- C.setCloseRequest closeReq conn
@@ -206,7 +205,7 @@ chatMessages sig = eventSource (callback sig) (\a -> case a of
 
 sendMessage :: forall eff. String -> AuthToken -> Aff (ajax :: AJAX | eff) (Maybe String)
 sendMessage s a = do
-    ebs <- runExceptT $ runReaderT (postGame a s) settings
+    ebs <- runExceptT $ runReaderT (postChat a s) settings
     pure $ case ebs of
         Left err -> Just $ errorToString err
         _ -> Nothing

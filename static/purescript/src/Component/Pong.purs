@@ -10,10 +10,10 @@ import Control.Monad.Eff.Class (class MonadEff, liftEff)
 import Control.Monad.Eff.Console (CONSOLE, log)
 import Control.Monad.Eff.Timer (clearInterval, setInterval, IntervalId, TIMER)
 
-import Data.Boolean (otherwise)
+import Data.Boolean (otherwise) 
 import Data.Eq ((==))
 import Data.Int (ceil)
-import Data.Maybe (Maybe(..))
+import Data.Maybe (Maybe(..))  
 import Data.Semigroup ((<>))
 import Graphics.Canvas (CANVAS)
 import Halogen (ComponentDSL, ComponentHTML, Component, HalogenEffects, action, lifecycleComponent, liftH, get, modify, subscribe, eventSource_, EventSource)
@@ -84,7 +84,7 @@ renderGameInfo :: PongState -> ComponentHTML Query
 renderGameInfo (PongState {score:{one, two} }) = H.div [] [ H.text (show one <> " : " <> show two) 
                                                           , H.p [] [H.text "Player One: 'w' and 's' keys"]
                                                           , H.p [] [H.text "Player Two: 'up' and 'down' keys"]]
-
+ 
 canvasName :: String
 canvasName = "Foo"
 

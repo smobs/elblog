@@ -10,6 +10,7 @@ import Component.About as About
 import Component.Blog as Blog
 import Component.Chat as Chat
 import Component.Pong as Pong
+import Component.Game as Game
 import HTML.Components as C
 import Halogen.HTML.CSS.PureCSS as Pure
 import Halogen.HTML.Indexed as H
@@ -69,9 +70,16 @@ instance ordChatSlot :: Ord ChatSlot where
 instance eqChatSlot :: Eq ChatSlot where
   eq _ _ = true
 
-type ChildState g = Either (Blog.FState g) (Either About.State (Either Pong.State Chat.State))
-type ChildQuery = Coproduct (Blog.FQuery) (Coproduct About.Query (Coproduct Pong.Query Chat.Query))
-type ChildSlot = Either BlogSlot (Either AboutSlot (Either PongSlot ChatSlot))
+data GameSlot = GameSlot
+instance ordGameSlot :: Ord GameSlot where
+  compare _ _ = EQ
+
+instance eqGameSlot :: Eq GameSlot where
+  eq _ _ = true
+  
+type ChildState g = Either (Blog.FState g) (Either About.State (Either Pong.State (Either Chat.State Game.State)))
+type ChildQuery = Coproduct (Blog.FQuery) (Coproduct About.Query (Coproduct Pong.Query (Coproduct Chat.Query Game.Query)))
+type ChildSlot = Either BlogSlot (Either AboutSlot (Either PongSlot (Either ChatSlot GameSlot)))
 
 type FState g = ParentState State (ChildState g) Query ChildQuery g ChildSlot
 type FQuery = Coproduct Query (ChildF ChildSlot ChildQuery)
@@ -100,7 +108,8 @@ page =
     renderPage AboutPage = H.slot' pathToAbout AboutSlot (\_ -> {initialState: unit, component: About.about})
     renderPage PongPage = H.slot' pathToPong PongSlot (\_ -> {initialState: Pong.initial, component: Pong.game})
     renderPage ChatPage = H.slot' pathToChat ChatSlot (\_ -> {initialState: Chat.initial, component: Chat.chat})
-    
+    renderPage GamePage = H.slot' pathToGame GameSlot (\_ -> {initialState: Game.initial, component: Game.game})
+
     pathToBlog :: ChildPath (Blog.FState a) (ChildState a) Blog.FQuery ChildQuery BlogSlot ChildSlot
     pathToBlog = cpL
 
@@ -111,11 +120,15 @@ page =
     pathToPong = cpR :> cpR :> cpL
 
     pathToChat :: ChildPath Chat.State (ChildState a) Chat.Query ChildQuery ChatSlot ChildSlot
-    pathToChat = cpR :> cpR :> cpR
+    pathToChat = cpR :> cpR :> cpR :> cpL
+
+    pathToGame :: ChildPath Game.State (ChildState a) Game.Query ChildQuery GameSlot ChildSlot
+    pathToGame = cpR :> cpR :> cpR :> cpR
 
     renderLinks :: forall p i . HTML p i
     renderLinks = C.nav "TOBY'S BLOG"
                   [ Tuple "PONG" "/#/pong"
                   , Tuple "CHAT" "/#/chat"
+                  , Tuple "GAME" "/#/game"
                   , Tuple "ABOUT" "/#/about"
                   ]

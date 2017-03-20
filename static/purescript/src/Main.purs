@@ -41,4 +41,5 @@ routing :: Match Page
 routing = AboutPage <$ lit "" <* lit "about"
           <|> PongPage <$ lit "" <* lit "pong"
           <|> ChatPage <$ lit "" <* lit "chat"
+          <|> GamePage <$ lit "" <* lit "game"
           <|> BlogPage <$ lit ""

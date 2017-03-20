@@ -4,6 +4,7 @@ import Prelude
 import WebAPI.Settings
 import WebAPI
 import Chat.ServerTypes
+import Component.LoginWidget as Login
 import Halogen.HTML.Events.Indexed as E
 import Halogen.HTML.Indexed as H
 import Halogen.HTML.Properties.Indexed as P
@@ -84,7 +85,7 @@ chat = lifecycleComponent {render, eval, initializer: Just (action Connect), fin
                                        ]
                             , H.button [E.onClick (E.input_ SendMessage)] [H.text "Send"]])
                         $ (\(ChatMessage t) -> H.div_ [H.text (t.userName <> ": " <> t.messageBody)]) <$> text
-              render _ = H.div_ $ [ H.text "Username",  H.input [E.onValueInput (E.input UpdateLogin), E.onKeyPress  (onlyForKey 13.0 (E.input_ SetAuth))], H.button [E.onClick (E.input_ SetAuth)] [H.text "Login"] ]
+              render _ = Login.render UpdateLogin SetAuth
               eval :: Query ~> (ComponentDSL State Query g)
               eval (Connect a) = do
                 st <- get

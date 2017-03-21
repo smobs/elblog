@@ -52,6 +52,7 @@ myTypes =  [
         , mkSumType (Proxy :: Proxy PSApp)
         , mkSumType (Proxy :: Proxy ChatMessage)
         , mkSumType (Proxy :: Proxy AuthToken)
+        , mkSumType (Proxy :: Proxy GameState)
           ]
 
 mySettings :: Settings

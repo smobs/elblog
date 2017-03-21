@@ -24,12 +24,14 @@ import           Servant.Subscriber
 import Servant.PureScript (jsonParseUrlPiece, jsonParseHeader)
 
 import Data.Text(Text)
+
 data ServerData = ServerData { messageRef :: IORef [ChatMessage]
+                             , gameRef :: IORef GameState
                              , subscriber :: Subscriber SiteApi}
 
-type GameHandler = (ReaderT ServerData Handler) 
+type ChatHandler = (ReaderT ServerData Handler) 
 
-transformGameHandler :: ServerData ->  (GameHandler :~> Handler)
+transformGameHandler :: ServerData ->  (ChatHandler :~> Handler)
 transformGameHandler sd = runReaderTNat sd
 
 main :: IO ()
@@ -37,22 +39,25 @@ main = do
   setLocaleEncoding utf8
   p <- port
   cd <- atomically (makeSubscriber "subscriber" runStderrLoggingT)
-  ref <- newIORef [ChatMessage "System" "First post!!!1!1!"]
-  run p $ app (ServerData ref cd) cd
+  mref <- newIORef [ChatMessage "System" "First post!!!1!1!"]
+  gref <- newIORef $ GameState 1
+  run p $ app (ServerData mref gref cd) cd
 
 app :: ServerData -> Subscriber SiteApi -> Application
 app sd sub = serveSubscriber sub (server sd)
 
 instance ToJSON Blog
 instance ToJSON ChatMessage
+instance ToJSON GameState
 instance FromJSON AuthToken
+
 
 instance FromHttpApiData AuthToken where
   parseUrlPiece = jsonParseUrlPiece
   parseHeader   = jsonParseHeader
 
-postGameHandler :: Text -> Text -> ReaderT ServerData Handler ()
-postGameHandler n s = do
+postChatHandler :: Text -> Text -> ReaderT ServerData Handler ()
+postChatHandler n s = do
   let d = ChatMessage n s
   r <- liftIO . flip atomicModifyIORef' (doAction d) =<< (messageRef <$> ask)
 
@@ -65,23 +70,44 @@ postGameHandler n s = do
     doAction s ms = (take 10 $ s : ms, take 10 $ s : ms)
 
 
-getGameHandler :: ReaderT ServerData Handler [ChatMessage]
-getGameHandler = do 
+getChatHandler :: ReaderT ServerData Handler [ChatMessage]
+getChatHandler = do 
   ref <- ask
   liftIO (readIORef (messageRef ref))
-              
 
-gameHandler :: AuthToken -> ServerT ChatApi GameHandler
-gameHandler (AuthToken t) = getGameHandler :<|> (postGameHandler t)
+getGameHandler :: ReaderT ServerData Handler GameState
+getGameHandler = do 
+  ref <- ask
+  pure $ GameState 2
 
-userMissingError :: Server ChatApi
+postGameInputHandler :: Text -> Int -> ReaderT ServerData Handler ()
+postGameInputHandler n kc = do
+  r <- liftIO . flip atomicModifyIORef' (doAction kc) =<< (gameRef <$> ask)
+
+  subscriber' <- (subscriber <$> ask)
+  let link :: Proxy ("game" :> Get '[JSON] GameState)
+      link = Proxy
+  liftIO . atomically $ notify subscriber' ModifyEvent link id
+  pure ()
+  where
+    doAction i  _ = (GameState i, GameState i)
+
+
+chatHandler :: AuthToken -> ServerT ChatApi ChatHandler
+chatHandler (AuthToken t) = getChatHandler :<|> (postChatHandler t)
+
+gameHandler :: AuthToken -> ServerT GameApi ChatHandler
+gameHandler (AuthToken t) = getGameHandler :<|> (postGameInputHandler t)
+
+userMissingError :: Server (ChatApi :<|> GameApi)
 userMissingError = let e = throwError $ err401 { errBody = "You have to provide a username!" }
-                   in e :<|> (\s -> e)
+                   in (e :<|> (\s -> e)) :<|> (e :<|> (\s -> e))
+
 
 apiHandler :: ServerData -> Server AppApi
 apiHandler sd = blogHandler
                  :<|> (\auth -> case auth of
-                                Just a -> enter (transformGameHandler sd) $ gameHandler a
+                                Just a -> enter (transformGameHandler sd) $ (chatHandler a :<|> gameHandler a)
                                 Nothing -> userMissingError)
 
 server ::  ServerData -> Server SiteApi

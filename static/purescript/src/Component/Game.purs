@@ -1,5 +1,6 @@
 module Component.Game where 
 
+import WebAPI
 import WebAPI.Settings
 import WebAPI.Subscriber as Sub
 import Halogen.HTML.Events.Indexed as E
@@ -23,6 +24,7 @@ import Control.Monad.Eff.Ref (REF)
 import Control.Monad.Except (runExceptT)
 import Control.Monad.Reader (runReaderT)
 import Component.LoginWidget as Login
+import Data.Either (Either(..))
 import Data.Generic
 import Data.Boolean (otherwise) 
 import Data.Eq ((==))
@@ -32,7 +34,7 @@ import Data.Semigroup ((<>))
 import Graphics.Canvas (CANVAS)
 import Halogen (ComponentDSL, ComponentHTML, Component, HalogenEffects, action, component, liftH, get, modify, subscribe, eventSource ,eventSource_, EventSource)
 import Halogen.HTML.Properties (pixels)
-
+import Data.Int
 import Prelude 
 import Halogen.Query (get, set)
 import Network.HTTP.Affjax (AJAX)
@@ -60,7 +62,7 @@ data Query a = NewGame a | Input KeyCode a | UpdateLogin String a | SetAuth a | 
 
 type Effects eff = (ajax :: AJAX, channel :: CHANNEL, ref :: REF, ws :: WEBSOCKET, canvas :: CANVAS , console :: CONSOLE | eff)
 
-game :: forall g eff. (Monad g, Affable (HalogenEffects(Effects eff)) g, MonadEff (HalogenEffects(Effects eff)) g) => Component State Query g 
+game :: forall g eff. (Monad g, Affable (HalogenEffects(Effects eff)) g, MonadAff (HalogenEffects(Effects eff)) g) => Component State Query g 
 game = component {render, eval}
             where
               render :: State -> ComponentHTML Query
@@ -75,8 +77,13 @@ game = component {render, eval}
               eval :: Query ~> (ComponentDSL State Query g)
               eval (NewGame a) =
                 pure a
-              eval (Input keyCode a) =
-                    pure a
+              eval (Input keyCode a) =do
+                st <- get
+                case st.auth of
+                  Nothing -> pure a
+                  Just t -> do 
+                       merr <- liftH <<< liftAff $ sendInput keyCode t
+                       pure a
               eval (UpdateLogin l a) = do
                 modify (\st -> st {login = l})
                 pure a
@@ -97,7 +104,7 @@ type Dimension = {h :: Number, w :: Number}
 canvasSize :: Dimension
 canvasSize = {h: 300.0, w: 500.0}
 
-data Action = Update (Array ChatMessage)
+data Action = Update GameState
             | ReportError 
             | SubscriberLog String
             | Nop
@@ -131,7 +138,7 @@ initSubscriber a = do
   let sig = Chan.subscribe ch
   --pongReq <- flip runReaderT settings $ MakeReq.putCounter (CounterAdd 1) -- | Let's play a bit! :-)
   -- closeReq <- flip runReaderT settings $ MakeReq.putCounter (CounterSet 100)
-  subs <- flip runReaderT settings $ Sub.getChat (maybe (ReportError) Update) a
+  subs <- flip runReaderT settings $ Sub.getGame (maybe (ReportError) Update) a
   let conn = Subscribe.getConnection sub
  -- C.setPongRequest pongReq conn -- |< Hihi :-)
  -- C.setCloseRequest closeReq conn
@@ -170,3 +177,10 @@ gameMessages sig = eventSource (callback sig) (\a -> case a of
         )
         where 
             f x = pure $ action x
+
+sendInput :: forall eff. Number -> AuthToken -> Aff (ajax :: AJAX | eff) (Maybe String)
+sendInput s a = do
+    ebs <- runExceptT $ runReaderT (postGameInput a (floor s)) settings
+    pure $ case ebs of
+        Left err -> Just $ errorToString err
+        _ -> Nothing

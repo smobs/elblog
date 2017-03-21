@@ -11,19 +11,20 @@ import PSApp
 import Servant.HTML.Blaze
 import GHC.Generics
 import Data.Text (Text)
+import Data.Wizard.View
+import Data.Wizard.Command
 
 data ChatMessage = ChatMessage {userName :: Text, messageBody :: Text } deriving (Generic, Eq, Show)
 
 data AuthToken = AuthToken Text deriving (Generic, Eq, Show)
-data GameState = GameState Int deriving (Generic, Eq, Show)
 
 type BlogApi = "api" :> "blogs" :> Get '[JSON] [Blog]
 type HomeApi = Get '[HTML] PSApp
 type ChatApi = "chat" :> (Subscribable :> Get '[JSON] [ChatMessage]
                 :<|> ReqBody '[JSON] Text :> Post '[JSON] ())
 
-type GameApi = "game" :> (Subscribable :> Get '[JSON] GameState
-                       :<|> "input" :> ReqBody '[JSON] Int :> Post '[JSON] ())
+type GameApi = "game" :> (Subscribable :> Get '[JSON] GameView
+                       :<|> "input" :> ReqBody '[JSON] GameCommand :> Post '[JSON] ())
 
 type AppApi = BlogApi :<|>  (Header "AuthToken" AuthToken :> (ChatApi :<|> GameApi))
 

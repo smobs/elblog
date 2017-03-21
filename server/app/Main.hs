@@ -3,6 +3,10 @@
 {-# LANGUAGE OverloadedStrings     #-}
 module Main where
 
+import Data.Wizard
+import Data.Wizard.View
+import Data.Wizard.Command
+
 import GHC.IO.Encoding
 import           Control.Monad.IO.Class   (liftIO)
 import           Control.Monad.Trans.Reader
@@ -48,8 +52,10 @@ app sd sub = serveSubscriber sub (server sd)
 
 instance ToJSON Blog
 instance ToJSON ChatMessage
-instance ToJSON GameState
+instance ToJSON GameView
 instance FromJSON AuthToken
+instance FromJSON GameCommand
+instance FromJSON Direction
 
 
 instance FromHttpApiData AuthToken where
@@ -75,22 +81,22 @@ getChatHandler = do
   ref <- ask
   liftIO (readIORef (messageRef ref))
 
-getGameHandler :: ReaderT ServerData Handler GameState
+getGameHandler :: ReaderT ServerData Handler GameView
 getGameHandler = do 
   ref <- ask
-  liftIO (readIORef (gameRef ref))
+  liftIO (stateToGameView <$> readIORef (gameRef ref))
 
-postGameInputHandler :: Text -> Int -> ReaderT ServerData Handler ()
+postGameInputHandler :: Text -> GameCommand -> ReaderT ServerData Handler ()
 postGameInputHandler n kc = do
   r <- liftIO . flip atomicModifyIORef' (doAction kc) =<< (gameRef <$> ask)
 
   subscriber' <- (subscriber <$> ask)
-  let link :: Proxy ("game" :> Get '[JSON] GameState)
+  let link :: Proxy ("game" :> Get '[JSON] GameView)
       link = Proxy
   liftIO . atomically $ notify subscriber' ModifyEvent link id
   pure ()
   where
-    doAction i  _ = (GameState i, GameState i)
+    doAction i g = (updateGame i g, updateGame i g)
 
 
 chatHandler :: AuthToken -> ServerT ChatApi ChatHandler

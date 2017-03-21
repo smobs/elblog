@@ -8,7 +8,10 @@ import Halogen.HTML.Indexed as H
 import Halogen.HTML.Properties.Indexed as P
 
 import Chat.ServerTypes
-import Control.Monad.Aff.Free (class Affable)
+import Data.Wizard.Command as Com
+import Data.Wizard.Command (GameCommand(..))
+import Data.Wizard.View
+import Control.Monad.Aff.Free (class Affable) 
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Class (class MonadEff, liftEff)
 import Control.Monad.Eff.Console (CONSOLE, log)
@@ -24,6 +27,7 @@ import Control.Monad.Eff.Ref (REF)
 import Control.Monad.Except (runExceptT)
 import Control.Monad.Reader (runReaderT)
 import Component.LoginWidget as Login
+import Data.Tuple (Tuple(..))
 import Data.Either (Either(..))
 import Data.Generic
 import Data.Boolean (otherwise) 
@@ -59,7 +63,7 @@ initial :: State
 initial = { auth: Nothing, login: ""}
 
 type KeyCode = Number
-data Query a = NewGame a | Input KeyCode a | UpdateLogin String a | SetAuth a | UpdateGame GameState a | NoOp a
+data Query a = NewGame a | Input KeyCode a | UpdateLogin String a | SetAuth a | UpdateGame GameView a | NoOp a
 
 type Effects eff = (ajax :: AJAX, channel :: CHANNEL, ref :: REF, ws :: WEBSOCKET, canvas :: CANVAS , console :: CONSOLE | eff)
 
@@ -80,10 +84,13 @@ game = component {render, eval}
                 pure a
               eval (Input keyCode a) =do
                 st <- get
-                case st.auth of
+                case do 
+                    au <- st.auth 
+                    com <- lookupControls keyCode
+                    pure (Tuple au com) of
                   Nothing -> pure a
-                  Just t -> do 
-                       merr <- liftH <<< liftAff $ sendInput keyCode t
+                  Just (Tuple t com) -> do 
+                       merr <- liftH <<< liftAff $ sendInput com t
                        pure a
               eval (UpdateLogin l a) = do
                 modify (\st -> st {login = l})
@@ -106,9 +113,9 @@ canvasName = "Foo"
 type Dimension = {h :: Number, w :: Number}
 
 canvasSize :: Dimension
-canvasSize = {h: 300.0, w: 500.0}
+canvasSize = {h: 600.0, w: 1200.0}
 
-data Action = Update GameState
+data Action = Update GameView
             | ReportError 
             | SubscriberLog String
             | Nop
@@ -182,9 +189,17 @@ gameMessages sig = eventSource (callback sig) (\a -> case a of
         where 
             f x = pure $ action x
 
-sendInput :: forall eff. Number -> AuthToken -> Aff (ajax :: AJAX | eff) (Maybe String)
+sendInput :: forall eff. GameCommand -> AuthToken -> Aff (ajax :: AJAX | eff) (Maybe String)
 sendInput s a = do
-    ebs <- runExceptT $ runReaderT (postGameInput a (floor s)) settings
+    ebs <- runExceptT $ runReaderT (postGameInput a s) settings
     pure $ case ebs of
         Left err -> Just $ errorToString err
         _ -> Nothing
+
+
+lookupControls :: KeyCode -> Maybe GameCommand
+lookupControls 37.0 = Just $ Move Com.Left
+lookupControls 38.0 = Just $ Move Com.Up
+lookupControls 39.0 = Just $ Move Com.Right
+lookupControls 40.0 = Just $ Move Com.Down
+lookupControls _ = Nothing

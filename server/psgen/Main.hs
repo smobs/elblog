@@ -12,6 +12,8 @@ module Main where
 import WebApi
 import PSApp
 import System.BlogRepository
+import Data.Wizard.Command
+import Data.Wizard.View
 import           Control.Applicative
 import           Control.Lens
 import           Data.Aeson
@@ -52,7 +54,9 @@ myTypes =  [
         , mkSumType (Proxy :: Proxy PSApp)
         , mkSumType (Proxy :: Proxy ChatMessage)
         , mkSumType (Proxy :: Proxy AuthToken)
-        , mkSumType (Proxy :: Proxy GameState)
+        , mkSumType (Proxy :: Proxy GameView)
+        , mkSumType (Proxy :: Proxy GameCommand)
+        , mkSumType (Proxy :: Proxy Direction)
           ]
 
 mySettings :: Settings

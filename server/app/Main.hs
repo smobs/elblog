@@ -78,7 +78,7 @@ getChatHandler = do
 getGameHandler :: ReaderT ServerData Handler GameState
 getGameHandler = do 
   ref <- ask
-  pure $ GameState 2
+  liftIO (readIORef (gameRef ref))
 
 postGameInputHandler :: Text -> Int -> ReaderT ServerData Handler ()
 postGameInputHandler n kc = do

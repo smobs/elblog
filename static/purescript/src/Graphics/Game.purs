@@ -19,11 +19,11 @@ renderGame cw ch id g =  do
     Just canvas -> do 
       ctx <- getContext2D canvas
       clearRect ctx {x: 0.0, y: 0.0, w: cw, h: ch} 
-      render ctx $ drawState g
+      render ctx $ drawState cw g
     Nothing -> pure unit
 
 
 
-drawState :: GameState -> Drawing
-drawState (GameState i) =  filled (fillColor black) $ fold $ (\x -> (  rectangle x x 1.0 1.0)) <$> toNumber <$> range 0 i
+drawState :: Number -> GameState -> Drawing
+drawState cw (GameState i) =  filled (fillColor black) $ fold $ (\x -> rectangle (toNumber $ mod (floor x) (floor cw)) (5.0 * (toNumber $ div (floor x) (floor cw)))  5.0 5.0) <$> (\x -> 5.0 * toNumber x)  <$> range 0 (i * 50)
     

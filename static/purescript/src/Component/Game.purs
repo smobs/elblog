@@ -51,14 +51,15 @@ import DOM(DOM)
 import DOM.HTML
 import DOM.HTML.Window
 import DOM.HTML.Location
+import Graphics.Game
 
-type State = {i :: Int, auth :: Maybe AuthToken, login :: String}
+type State = {auth :: Maybe AuthToken, login :: String}
 
 initial :: State
-initial = {i: 0, auth: Nothing, login: ""}
+initial = { auth: Nothing, login: ""}
 
 type KeyCode = Number
-data Query a = NewGame a | Input KeyCode a | UpdateLogin String a | SetAuth a | NoOp a
+data Query a = NewGame a | Input KeyCode a | UpdateLogin String a | SetAuth a | UpdateGame GameState a | NoOp a
 
 type Effects eff = (ajax :: AJAX, channel :: CHANNEL, ref :: REF, ws :: WEBSOCKET, canvas :: CANVAS , console :: CONSOLE | eff)
 
@@ -95,6 +96,9 @@ game = component {render, eval}
                 subscribe (gameMessages sub.messages)
                 pure a
               eval (NoOp a) = pure a
+              eval (UpdateGame g a) = do
+                liftH <<< liftEff $ renderGame canvasSize.w canvasSize.h canvasName g
+                pure a
 
 canvasName :: String
 canvasName = "Foo"
@@ -170,7 +174,7 @@ callback sig eff = do
 
 gameMessages ::  forall g eff. (Monad g, Affable (HalogenEffects(Effects eff)) g) => Signal Action ->  EventSource Query g
 gameMessages sig = eventSource (callback sig) (\a -> case a of
-            Update s -> f $ NoOp
+            Update s -> f $ UpdateGame s
             Nop -> f $ NoOp
             ReportError -> f $ NoOp
             SubscriberLog s -> f $ NoOp

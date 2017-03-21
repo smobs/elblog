@@ -44,7 +44,7 @@ main = do
   p <- port
   cd <- atomically (makeSubscriber "subscriber" runStderrLoggingT)
   mref <- newIORef [ChatMessage "System" "First post!!!1!1!"]
-  gref <- newIORef $ GameState 1
+  gref <- newIORef $ initialState
   run p $ app (ServerData mref gref cd) cd
 
 app :: ServerData -> Subscriber SiteApi -> Application

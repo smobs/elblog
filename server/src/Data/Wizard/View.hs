@@ -9,4 +9,4 @@ data GameView = GameView {terrain :: [Shape]} deriving (Generic, Eq, Show)
 data Shape = Rectangle Double Double Double Double deriving (Generic, Eq, Show)
 
 stateToGameView :: GameState -> GameView
-stateToGameView (GameState i) = let x = fromIntegral i in GameView [Rectangle x x x x]
+stateToGameView (GameState (x,y)) = GameView [Rectangle (fromIntegral x) (fromIntegral y) 10 10]

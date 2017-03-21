@@ -3,15 +3,17 @@ module Graphics.Game where
 import Prelude
 import Data.Int
 import Data.Array
-import Control.Category ((<<<))
-import Control.Monad.Eff (Eff)
-import Data.Maybe (Maybe(..))
 import Data.Monoid
-import Graphics.Canvas (clearRect, getContext2D, getCanvasElementById, CANVAS)
-import Graphics.Drawing (fillColor, Drawing, render, rectangle, filled, black)
 import Data.Foldable
 import Chat.ServerTypes
-import Data.Wizard.View
+import Data.Wizard.View as View
+import Control.Category ((<<<))
+import Control.Monad.Eff (Eff)
+import Data.Function ((<<<))
+import Data.Maybe (Maybe(..))
+import Data.Wizard.View (GameView(..))
+import Graphics.Canvas (clearRect, getContext2D, getCanvasElementById, CANVAS)
+import Graphics.Drawing (Drawing, Shape, black, fillColor, filled, rectangle, render)
 
 renderGame :: forall eff. Number -> Number -> String -> GameView -> Eff (canvas :: CANVAS | eff) Unit
 renderGame cw ch id g =  do
@@ -26,5 +28,11 @@ renderGame cw ch id g =  do
 
 
 drawState :: Number -> GameView -> Drawing
-drawState cw (GameView i) =  filled (fillColor black) $ fold $ (\x -> rectangle (toNumber $ mod (floor x) (floor cw)) (5.0 * (toNumber $ div (floor x) (floor cw)))  5.0 5.0) <$> (\x -> 5.0 * toNumber x)  <$> range 0 (i * 50)
-    
+drawState cw (GameView {terrain}) =  drawTerrain terrain
+
+drawTerrain :: Array (View.Shape) -> Drawing
+drawTerrain = filled (fillColor black) <<< fold <<< (<$>) drawShape 
+
+drawShape :: View.Shape -> Shape
+drawShape (View.Rectangle x y w h) = rectangle x y w h
+

@@ -2,7 +2,7 @@ flags: {}
 packages:
 - 'server'
 extra-deps:
-- purescript-bridge-0.8.0.0
+- purescript-bridge-0.10.1.0
 - wai-websockets-3.0.1.1
 - websockets-0.10.0.0
 - servant-subscriber-0.6.0.0

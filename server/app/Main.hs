@@ -52,7 +52,10 @@ app sd sub = serveSubscriber sub (server sd)
 
 instance ToJSON Blog
 instance ToJSON ChatMessage
+
+instance ToJSON Shape
 instance ToJSON GameView
+
 instance FromJSON AuthToken
 instance FromJSON GameCommand
 instance FromJSON Direction

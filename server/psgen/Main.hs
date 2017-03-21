@@ -55,6 +55,7 @@ myTypes =  [
         , mkSumType (Proxy :: Proxy ChatMessage)
         , mkSumType (Proxy :: Proxy AuthToken)
         , mkSumType (Proxy :: Proxy GameView)
+        , mkSumType (Proxy :: Proxy Shape)
         , mkSumType (Proxy :: Proxy GameCommand)
         , mkSumType (Proxy :: Proxy Direction)
           ]

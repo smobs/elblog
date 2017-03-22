@@ -102,7 +102,7 @@ game = lifecycleComponent {render, eval, initializer: Nothing, finalizer: Just $
                 set $ st {auth = Just t}
                 sub <- liftH $ liftEff $ initSubscriber t 
                 subscribe (gameMessages sub.messages)
-                liftH <<< liftAff $ sendCommand (Com.Configuration (Com.AddPlayer st.login)) t
+                liftH <<< liftAff $ sendCommand (Com.Configuration (Com.AddPlayer)) t
                 pure a
               eval (NoOp a) = pure a
               eval (UpdateGame g a) = do
@@ -112,8 +112,8 @@ game = lifecycleComponent {render, eval, initializer: Nothing, finalizer: Just $
                 st <- get
                 case st.auth of
                     Nothing -> pure a
-                    Just (AuthToken t) -> do 
-                        liftH <<< liftAff $ sendCommand (Com.Configuration (Com.RemovePlayer t)) (AuthToken t)
+                    Just  t -> do 
+                        liftH <<< liftAff $ sendCommand (Com.Configuration (Com.RemovePlayer)) t
                         pure a
 
 canvasName :: String

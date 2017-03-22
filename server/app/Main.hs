@@ -94,7 +94,7 @@ getGameHandler = do
 
 postGameInputHandler :: Text -> GameCommand -> ReaderT ServerData Handler ()
 postGameInputHandler n kc = do
-  r <- liftIO . flip atomicModifyIORef' (doAction kc) =<< (gameRef <$> ask)
+  r <- liftIO . flip atomicModifyIORef' (doAction n kc) =<< (gameRef <$> ask)
 
   subscriber' <- (subscriber <$> ask)
   let link :: Proxy ("game" :> Get '[JSON] GameView)
@@ -102,7 +102,7 @@ postGameInputHandler n kc = do
   liftIO . atomically $ notify subscriber' ModifyEvent link id
   pure ()
   where
-    doAction i g = (updateGame i g, updateGame i g)
+    doAction n i g = (updateGame n i g, updateGame n i g)
 
 
 chatHandler :: AuthToken -> ServerT ChatApi ChatHandler

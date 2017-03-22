@@ -16,3 +16,4 @@ updateGame (Com.Move d) (GameState (x,y)) = case d of
     Com.Down -> GameState (x, y + 5)
     Com.Left -> GameState (x - 5, y)
     Com.Right -> GameState (x + 5, y)
+updateGame _ g = g

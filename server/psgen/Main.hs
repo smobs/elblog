@@ -48,18 +48,22 @@ myBridgeProxy = Proxy
 instance HasBridge MyBridge where
   languageBridge _ = buildBridge myBridge
 
+commandTypes :: [SumType 'Haskell]
+commandTypes = [ mkSumType (Proxy :: Proxy GameCommand)
+               , mkSumType (Proxy :: Proxy Direction)
+               , mkSumType (Proxy :: Proxy ConfigurationCommand)]
+
+viewTypes :: [SumType 'Haskell]
+viewTypes = [ mkSumType (Proxy :: Proxy GameView)
+            , mkSumType (Proxy :: Proxy Shape)
+            , mkSumType (Proxy :: Proxy PlayerView)
+            , mkSumType (Proxy :: Proxy Colour)  ]
 myTypes :: [SumType 'Haskell]
-myTypes =  [
+myTypes =  commandTypes <> viewTypes <> [
           mkSumType (Proxy :: Proxy Blog)
         , mkSumType (Proxy :: Proxy PSApp)
         , mkSumType (Proxy :: Proxy ChatMessage)
-        , mkSumType (Proxy :: Proxy AuthToken)
-        , mkSumType (Proxy :: Proxy GameView)
-        , mkSumType (Proxy :: Proxy Shape)
-        , mkSumType (Proxy :: Proxy PlayerView)
-        , mkSumType (Proxy :: Proxy Colour)        
-        , mkSumType (Proxy :: Proxy GameCommand)
-        , mkSumType (Proxy :: Proxy Direction)
+        , mkSumType (Proxy :: Proxy AuthToken)   
           ]
 
 mySettings :: Settings

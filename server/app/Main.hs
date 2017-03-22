@@ -62,7 +62,7 @@ instance ToJSON Colour
 instance FromJSON AuthToken
 instance FromJSON GameCommand
 instance FromJSON Direction
-
+instance FromJSON ConfigurationCommand
 
 instance FromHttpApiData AuthToken where
   parseUrlPiece = jsonParseUrlPiece

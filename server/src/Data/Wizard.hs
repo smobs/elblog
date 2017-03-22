@@ -9,6 +9,7 @@ data GameState = GameState (Int,Int) deriving (Eq, Show)
 
 initialState :: GameState
 initialState = GameState (0,0)
+
 updateGame :: Com.GameCommand -> GameState -> GameState
 updateGame (Com.Move d) (GameState (x,y)) = case d of
     Com.Up -> GameState (x, y - 5)

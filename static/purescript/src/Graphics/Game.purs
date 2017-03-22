@@ -1,6 +1,7 @@
 module Graphics.Game where
 
 import Prelude
+import Color
 import Data.Int
 import Data.Array
 import Data.Monoid
@@ -28,10 +29,13 @@ renderGame cw ch id g =  do
 
 
 drawState :: Number -> GameView -> Drawing
-drawState cw (GameView {terrain}) =  drawTerrain terrain
+drawState cw (GameView {terrain, players}) =  drawTerrain terrain <> (fold $ drawPlayer <$> players)
 
 drawTerrain :: Array (View.Shape) -> Drawing
 drawTerrain = filled (fillColor black) <<< fold <<< (<$>) drawShape 
+
+drawPlayer :: View.PlayerView -> Drawing
+drawPlayer (View.PlayerView s (View.Colour r g b)) = filled (fillColor (rgb r g b)) $ drawShape s
 
 drawShape :: View.Shape -> Shape
 drawShape (View.Rectangle x y w h) = rectangle x y w h

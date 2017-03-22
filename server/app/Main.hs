@@ -55,6 +55,9 @@ instance ToJSON ChatMessage
 
 instance ToJSON Shape
 instance ToJSON GameView
+instance ToJSON PlayerView
+instance ToJSON Colour
+
 
 instance FromJSON AuthToken
 instance FromJSON GameCommand

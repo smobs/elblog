@@ -56,6 +56,8 @@ commandTypes = [ mkSumType (Proxy :: Proxy GameCommand)
 viewTypes :: [SumType 'Haskell]
 viewTypes = [ mkSumType (Proxy :: Proxy GameView)
             , mkSumType (Proxy :: Proxy Shape)
+            , mkSumType (Proxy :: Proxy Terrain)
+            , mkSumType (Proxy :: Proxy Position)
             , mkSumType (Proxy :: Proxy PlayerView)
             , mkSumType (Proxy :: Proxy Colour)  ]
 myTypes :: [SumType 'Haskell]

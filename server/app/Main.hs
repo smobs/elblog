@@ -54,8 +54,10 @@ instance ToJSON Blog
 instance ToJSON ChatMessage
 
 instance ToJSON Shape
+instance ToJSON Position
 instance ToJSON GameView
 instance ToJSON PlayerView
+instance ToJSON Terrain
 instance ToJSON Colour
 
 

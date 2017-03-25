@@ -31,12 +31,12 @@ renderGame cw ch id g =  do
 drawState :: Number -> GameView -> Drawing
 drawState cw (GameView {terrain, players}) =  drawTerrain terrain <> (fold $ drawPlayer <$> players)
 
-drawTerrain :: Array (View.Shape) -> Drawing
-drawTerrain = filled (fillColor black) <<< fold <<< (<$>) drawShape 
+drawTerrain :: Array (View.Terrain) -> Drawing
+drawTerrain = filled (fillColor black) <<< fold <<< (<$>) (\(View.Terrain pos shape) ->  drawShape pos shape) 
 
 drawPlayer :: View.PlayerView -> Drawing
-drawPlayer (View.PlayerView s (View.Colour r g b) n) = filled (fillColor (rgb r g b)) $ drawShape s
+drawPlayer (View.PlayerView p s (View.Colour r g b) n) = filled (fillColor (rgb r g b)) $ drawShape p s 
 
-drawShape :: View.Shape -> Shape
-drawShape (View.Rectangle x y w h) = rectangle x y w h
+drawShape :: View.Position -> View.Shape -> Shape
+drawShape (View.Position x y) (View.Rectangle w h) = rectangle x y w h
 

@@ -17,10 +17,13 @@ initialState = GameState M.empty
 addPlayer :: PlayerId -> GameState -> GameState
 addPlayer n (GameState ps) = GameState $ M.insert n (0,0) ps
 
+removePlayer :: PlayerId -> GameState -> GameState
+removePlayer n (GameState ps) = GameState $ M.delete n ps
+
 updateGame :: PlayerId -> Com.GameCommand -> GameState -> GameState
 updateGame pId (Com.Move d) (GameState ps) = GameState $ M.update (Just . move d) pId ps
 updateGame pId (Com.Configuration Com.AddPlayer) g =  addPlayer pId g
-updateGame _ _ g = g
+updateGame pId (Com.Configuration Com.RemovePlayer) g =  removePlayer pId g
 
 
 move :: (Com.Direction) -> (Int, Int) -> (Int, Int)

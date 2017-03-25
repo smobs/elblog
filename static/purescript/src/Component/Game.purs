@@ -2,6 +2,7 @@ module Component.Game where
 
 import WebAPI
 import WebAPI.Settings
+import WebAPI.MakeRequests as MakeReq
 import Chat.ServerTypes
 import Data.Wizard.View
 import Data.Generic
@@ -19,7 +20,6 @@ import Halogen.HTML.Properties.Indexed as P
 import Servant.Subscriber as Subscribe
 import Signal.Channel as Chan
 import WebAPI.Subscriber as Sub
-import CSS.Transform (offset)
 import Control.Monad.Aff (Aff)
 import Control.Monad.Aff.Class (class MonadAff, liftAff)
 import Control.Monad.Aff.Console (error)
@@ -52,7 +52,7 @@ import Halogen.Query (get, set)
 import Network.HTTP.Affjax (AJAX)
 import Servant.PureScript.Affjax (errorToString)
 import Servant.Subscriber (Subscriber, SubscriberEff, makeSubscriber)
-import Servant.Subscriber.Connection (Config)
+import Servant.Subscriber.Connection (Config, setCloseRequest)
 import Servant.Subscriber.Internal (doCallback)
 import Signal (Signal, runSignal)
 import Signal.Channel (Channel, send, channel, CHANNEL)
@@ -157,11 +157,11 @@ initSubscriber a = do
   sub <- makeSubscriber c
   let sig = Chan.subscribe ch
   --pongReq <- flip runReaderT settings $ MakeReq.putCounter (CounterAdd 1) -- | Let's play a bit! :-)
-  -- closeReq <- flip runReaderT settings $ MakeReq.putCounter (CounterSet 100)
+  closeReq <- flip runReaderT settings $ MakeReq.postGameInput a (Com.Configuration (Com.RemovePlayer))
   subs <- flip runReaderT settings $ Sub.getGame (maybe (ReportError) Update) a
   let conn = Subscribe.getConnection sub
  -- C.setPongRequest pongReq conn -- |< Hihi :-)
- -- C.setCloseRequest closeReq conn
+  setCloseRequest closeReq conn
   Subscribe.deploy subs sub
   pure $ { subscriber : sub, messages : sig }
 

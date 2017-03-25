@@ -14,7 +14,8 @@ import Data.Function ((<<<))
 import Data.Maybe (Maybe(..))
 import Data.Wizard.View (GameView(..))
 import Graphics.Canvas (clearRect, getContext2D, getCanvasElementById, CANVAS)
-import Graphics.Drawing (Drawing, Shape, black, fillColor, filled, rectangle, render)
+import Graphics.Drawing (Drawing, Shape, black, fillColor, filled, rectangle, render, text)
+import Graphics.Drawing.Font
 
 renderGame :: forall eff. Number -> Number -> String -> GameView -> Eff (canvas :: CANVAS | eff) Unit
 renderGame cw ch id g =  do
@@ -35,7 +36,7 @@ drawTerrain :: Array (View.Terrain) -> Drawing
 drawTerrain = filled (fillColor black) <<< fold <<< (<$>) (\(View.Terrain pos shape) ->  drawShape pos shape) 
 
 drawPlayer :: View.PlayerView -> Drawing
-drawPlayer (View.PlayerView p s (View.Colour r g b) n) = filled (fillColor (rgb r g b)) $ drawShape p s 
+drawPlayer (View.PlayerView (p@(View.Position x y)) s (View.Colour r g b) n) = (text (font serif 12 mempty) x y (fillColor black) n) <> (filled (fillColor (rgb r g b)) $ drawShape p s)
 
 drawShape :: View.Position -> View.Shape -> Shape
 drawShape (View.Position x y) (View.Rectangle w h) = rectangle x y w h

@@ -5,10 +5,10 @@ setup:
 
 build: server-build	ps-build
 
-server-build: 
-	stack build
+server-build: install
 
 ps-build: 
 	stack exec psgen
 
-install: stack build --copy-bins
+install:
+	stack build --fast --copy-bins

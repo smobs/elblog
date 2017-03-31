@@ -10,3 +10,5 @@ server-build:
 
 ps-build: 
 	stack exec psgen
+
+install: stack build --copy-bins

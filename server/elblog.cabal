@@ -21,7 +21,9 @@ library
                      , blaze-markup
                      , containers
                      , filepath
+                     , finite-typelits
                      , servant-blaze
+                     , singletons
                      , directory
                      , servant-server
                      , servant-subscriber

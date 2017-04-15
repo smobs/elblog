@@ -22,6 +22,10 @@ initialState :: GameState
 initialState = GameState M.empty
 
 
+getDimensions :: (Int, Int)
+getDimensions = let (x, y) = (finiteZero, finiteZero) :: PlayerPosition 
+                in (fromIntegral $ natVal x, fromIntegral $ natVal y)
+
 addPlayer :: PlayerId -> GameState -> GameState
 addPlayer n (GameState ps) = GameState $ M.insert n (finiteZero,finiteZero) ps
 

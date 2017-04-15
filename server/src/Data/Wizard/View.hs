@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DeriveGeneric, ScopedTypeVariables #-}
 module Data.Wizard.View where 
 
 import GHC.Generics
@@ -15,9 +15,6 @@ data Shape = Rectangle Double Double deriving (Generic, Eq, Show)
 data Position = Position Double Double deriving (Generic, Eq, Show)
 
 data Terrain = Terrain Position Shape deriving (Generic, Eq, Show)
-
-getDimensions :: (Int, Int)
-getDimensions = (1000, 500)
 
 stateToGameView :: GameState -> GameView
 stateToGameView (GameState ps) = GameView [] (toPlayerView <$> M.toList ps) (getDimensions)

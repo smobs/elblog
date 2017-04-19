@@ -18,6 +18,7 @@ import           Network.Wai
 import           Network.Wai.Handler.Warp
 import           PSApp
 import           WebApi
+import           Control.Concurrent
 import           Control.Concurrent.STM 
 import           Servant
 import           Servant.HTML.Blaze
@@ -25,12 +26,15 @@ import           System.BlogRepository
 import           System.Environment
 import           Servant.Subscriber.Subscribable
 import           Servant.Subscriber
+
 import Servant.PureScript (jsonParseUrlPiece, jsonParseHeader)
 
 import Data.Text(Text)
+import GameWire
 
 data ServerData = ServerData { messageRef :: IORef [ChatMessage]
-                             , gameRef :: IORef GameState
+                             , gameViewRef :: TVar GameView
+                             , gameCommandRef :: TVar [(PlayerId, GameCommand)]
                              , subscriber :: Subscriber SiteApi}
 
 type ChatHandler = (ReaderT ServerData Handler) 
@@ -44,8 +48,20 @@ main = do
   p <- port
   cd <- atomically (makeSubscriber "subscriber" runStderrLoggingT)
   mref <- newIORef [ChatMessage "System" "First post!!!1!1!"]
-  gref <- newIORef $ initialState
-  run p $ app (ServerData mref gref cd) cd
+  gcref <- atomically $ newTVar []
+  gvref <- atomically $ newTVar (stateToGameView initialState)
+  _ <- forkIO $ gameSystem gcref (\ x -> do 
+    atomically $ writeTVar gvref x
+    notifyGameView cd)
+  run p $ app (ServerData mref gvref gcref cd) cd
+
+notifyGameView :: Subscriber SiteApi -> IO ()
+notifyGameView sub = do
+    let link :: Proxy ("game" :> Get '[JSON] GameView)
+        link = Proxy
+    atomically $ notify sub ModifyEvent link id
+    pure ()
+
 
 app :: ServerData -> Subscriber SiteApi -> Application
 app sd sub = serveSubscriber sub (server sd)
@@ -92,20 +108,14 @@ getChatHandler = do
 getGameHandler :: ReaderT ServerData Handler GameView
 getGameHandler = do 
   ref <- ask
-  liftIO (stateToGameView <$> readIORef (gameRef ref))
+  liftIO (atomically $ readTVar (gameViewRef ref))
 
 postGameInputHandler :: Text -> GameCommand -> ReaderT ServerData Handler ()
 postGameInputHandler n kc = do
-  r <- liftIO . flip atomicModifyIORef' (doAction n kc) =<< (gameRef <$> ask)
-
-  subscriber' <- (subscriber <$> ask)
-  let link :: Proxy ("game" :> Get '[JSON] GameView)
-      link = Proxy
-  liftIO . atomically $ notify subscriber' ModifyEvent link id
-  pure ()
-  where
-    doAction n i g = (updateGame n i g, updateGame n i g)
-
+  ref <- (gameCommandRef <$> ask)
+  liftIO $ atomically (do 
+    xs <- readTVar ref
+    writeTVar ref ((n, kc) : xs)) 
 
 chatHandler :: AuthToken -> ServerT ChatApi ChatHandler
 chatHandler (AuthToken t) = getChatHandler :<|> (postChatHandler t)

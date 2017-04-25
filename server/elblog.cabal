@@ -21,7 +21,6 @@ library
                      , blaze-markup
                      , containers
                      , filepath
-                     , netwire
                      , servant-blaze
                      , singletons
                      , directory
@@ -45,7 +44,6 @@ executable elblog-server
                      , http-api-data
                      , js-jquery
                      , monad-logger
-                     , netwire
                      , random
                      , servant
                      , servant-docs

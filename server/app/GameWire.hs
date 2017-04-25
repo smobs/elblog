@@ -31,7 +31,7 @@ gameLoop ref out g t = do
     t' <- getCurrentTime
     let delta = diffUTCTime t' t
     actions <- liftIO ( atomically  (readAndEmpty ref))
-    let g' = stepGame delta $ foldr (\(pid, c) g -> updateGame pid c g) g actions
+    g' <- stepGame (fromRational (toRational delta)) $ foldr (\(pid, c) g -> updateGame pid c g) g actions
     out $ stateToGameView g' 
     threadDelay (1000000  `div` 30)
     gameLoop ref out g' t' 

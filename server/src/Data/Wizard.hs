@@ -37,8 +37,10 @@ updateGame pId (Com.Move d) (GameState ps) = GameState $ M.update (Just . move d
 updateGame pId (Com.Configuration Com.AddPlayer) g =  addPlayer pId g
 updateGame pId (Com.Configuration Com.RemovePlayer) g =  removePlayer pId g
 
-stepGame :: Num a => a -> GameState -> GameState 
-stepGame _ = id
+stepGame :: Double -> GameState -> IO GameState 
+stepGame i g = do
+    putStrLn (show i) 
+    pure g
 
 move :: (KnownNat w, KnownNat h) => (Com.Direction) -> (FiniteDouble w, FiniteDouble h) -> (FiniteDouble w, FiniteDouble h)
 move d (x,y) = let inc = toBoundedDouble 5 

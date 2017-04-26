@@ -5,6 +5,7 @@ import GHC.Generics
 import Data.Wizard
 import Data.FiniteDouble
 import Data.ComponentSystem
+import Data.Functor.Apply((<.>))
 
 data GameView = GameView {terrain :: [Terrain], players :: [PlayerView], dimensions :: (Int, Int)} deriving (Generic, Eq, Show)
 
@@ -20,9 +21,9 @@ data Terrain = Terrain Position Shape deriving (Generic, Eq, Show)
 stateToGameView :: GameState -> GameView
 stateToGameView g = GameView [] (toPlayerView <$> getPlayers g) (getDimensions)
 
-getPlayers :: GameState -> [(PlayerId, GamePosition)]
-getPlayers (GameState {..}) = listComponents $ asMarker playerSys positionSys
+getPlayers :: GameState -> [(PlayerId, (GamePosition, Bounds))]
+getPlayers (GameState {..}) = listComponents $ (,) <$> (asMarker playerSys positionSys) <.> boundSys
 
-toPlayerView :: (PlayerId, GamePosition) -> PlayerView
-toPlayerView (n,(x,y)) = 
-        PlayerView (Position (getFinite x) (getFinite y))(Rectangle 10 10) (Colour 256 0 0) n
+toPlayerView :: (PlayerId, (GamePosition, Bounds)) -> PlayerView
+toPlayerView (n,((x,y), (w, h))) = 
+        PlayerView (Position (getFinite x) (getFinite y))(Rectangle (getFinite w) (getFinite h)) (Colour 256 0 0) n

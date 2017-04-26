@@ -14,15 +14,18 @@ import Data.Functor.Apply
 type Vector = (Double, Double)
 type GamePosition = (FiniteDouble 1000, FiniteDouble 500)
 
+type Bounds = GamePosition
+
 type Velocity = Vector
 data GameState = GameState { positionSys :: ComponentSystem GamePosition
                            , velocitySys :: ComponentSystem Vector
-                           , playerSys :: ComponentSystem ()} 
+                           , playerSys :: ComponentSystem ()
+                           , boundSys :: ComponentSystem Bounds} 
 
 type PlayerId = EntityId
 
 initialState :: GameState
-initialState = GameState newSystem newSystem newSystem
+initialState = GameState newSystem newSystem newSystem newSystem
 
 getDimensions :: (Int, Int)
 getDimensions = let (x, y) = (finiteZero, finiteZero) :: GamePosition 
@@ -32,7 +35,8 @@ addPlayer :: PlayerId -> GameState -> GameState
 addPlayer pid g@(GameState{..})= let add = addComponent pid in
     g { positionSys = add (finiteZero,finiteZero) positionSys
       , velocitySys = add (0, 0) velocitySys
-      , playerSys = add () playerSys}
+      , playerSys = add () playerSys
+      , boundSys = add (clampedAdd finiteZero 20, clampedAdd finiteZero 20) boundSys}
 
 removePlayer :: PlayerId -> GameState -> GameState
 removePlayer n g@(GameState {..}) = let del = deleteComponent n 

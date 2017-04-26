@@ -32,14 +32,12 @@ getDimensions = let (x, y) = (finiteZero, finiteZero) :: GamePosition
 addPlayer :: PlayerId -> GameState -> GameState
 addPlayer pid g@(GameState{..})= g {positionSys = addComponent pid (finiteZero,finiteZero) positionSys, velocitySys = addComponent pid (0, 0) velocitySys}
 
-
 removePlayer :: PlayerId -> GameState -> GameState
 removePlayer n (GameState poss velocitys) = GameState (deleteComponent n poss) (deleteComponent n velocitys) 
 
 updateGame :: PlayerId -> Com.GameCommand -> GameState -> GameState
 updateGame pId (Com.Move d) g@(GameState{..}) = g {velocitySys = updateComponent (Just . setVelocity 20 d) pId velocitySys}
 updateGame pId (Com.StopMove d) g@(GameState{..}) = g {velocitySys = updateComponent (Just . stopVelocity d) pId velocitySys}
-
 updateGame pId (Com.Configuration Com.AddPlayer) g =  addPlayer pId g 
 updateGame pId (Com.Configuration Com.RemovePlayer) g =  removePlayer pId g
 
@@ -54,6 +52,7 @@ setVelocity speed d (x,y) = case d of
                                 Com.Down -> (x, speed)
                                 Com.Left -> (-speed, y)
                                 Com.Right -> (speed, y)
+
 stopVelocity :: Com.Direction -> Velocity -> Velocity
 stopVelocity d (x,y) = case d of
                                 Com.Up -> (x, 0)

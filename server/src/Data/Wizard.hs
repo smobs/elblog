@@ -6,6 +6,7 @@
 module Data.Wizard where
 
 import qualified Data.Wizard.Command as Com
+import qualified Data.Text as T
 import GHC.TypeLits
 import Data.FiniteDouble
 import Control.Arrow((***))
@@ -32,11 +33,13 @@ getDimensions = let (x, y) = (finiteZero, finiteZero) :: GamePosition
                 in (fromIntegral $ natVal x, fromIntegral $ natVal y)
 
 addPlayer :: PlayerId -> GameState -> GameState
-addPlayer pid g@(GameState{..})= let add = addComponent pid in
+addPlayer pid g@(GameState{..})= let add = addComponent pid 
+                                     size = fromIntegral $ 5 * T.length pid
+                                 in
     g { positionSys = add (finiteZero,finiteZero) positionSys
       , velocitySys = add (0, 0) velocitySys
       , playerSys = add () playerSys
-      , boundSys = add (clampedAdd finiteZero 20, clampedAdd finiteZero 20) boundSys}
+      , boundSys = add (clampedAdd finiteZero (size), clampedAdd finiteZero (size)) boundSys}
 
 removePlayer :: PlayerId -> GameState -> GameState
 removePlayer n g@(GameState {..}) = let del = deleteComponent n 

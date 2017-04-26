@@ -5,13 +5,13 @@ module Data.ComponentSystem (
     updateComponent,
     addComponent,
     deleteComponent,
-    liftSystem,
     listComponents
     ) where
 
 
 import qualified Data.Map.Strict as M
 import Data.Text(Text)
+import Data.Functor.Apply
 
 type EntityId = Text
 data ComponentSystem a = CS (M.Map EntityId a) 
@@ -28,9 +28,10 @@ updateComponent f e (CS cs) = CS $  M.update f e cs
 deleteComponent :: EntityId -> ComponentSystem a -> ComponentSystem a
 deleteComponent e (CS cs) = CS $  M.delete e cs
 
-
-liftSystem :: (a -> b -> c) -> ComponentSystem a -> ComponentSystem b -> ComponentSystem c
-liftSystem f (CS as) (CS bs) = CS $ M.mapMaybeWithKey (\k b -> f <$> (M.lookup k as) <*> (pure b)) bs
+instance Functor ComponentSystem where 
+    fmap f (CS cs) = CS $ fmap f cs
+instance Apply ComponentSystem where
+    (<.>) (CS fs) (CS as) = CS $ M.mapMaybeWithKey (\k f -> f <$> M.lookup k as) fs
 
 listComponents :: ComponentSystem a -> [(EntityId, a)]
 listComponents (CS cs) = M.toList cs

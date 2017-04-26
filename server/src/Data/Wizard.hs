@@ -12,6 +12,7 @@ import GHC.TypeLits
 import Data.FiniteDouble
 import Control.Arrow((***))
 import Data.ComponentSystem
+import Data.Functor.Apply
 type Vector = (Double, Double)
 type GamePosition = (FiniteDouble 1000, FiniteDouble 500)
 
@@ -42,7 +43,7 @@ updateGame pId (Com.Configuration Com.RemovePlayer) g =  removePlayer pId g
 
 stepGame :: Double -> GameState -> IO GameState 
 stepGame i g@GameState{..} = do
-    let s' = liftSystem (move i) speedSys positionSys
+    let s' = liftF2 (move i) speedSys positionSys
     pure g {positionSys = s'}
 
 adjustSpeed :: Com.Direction -> Speed -> Speed
@@ -54,3 +55,4 @@ adjustSpeed d (x,y) = case d of
 
 move :: (KnownNat w, KnownNat h) => Double -> Vector -> (FiniteDouble w, FiniteDouble h) -> (FiniteDouble w, FiniteDouble h)
 move delta (vecx, vecy) p =  (\ (fx, fy) -> (fx$ vecx*delta, fy $ vecy * delta )) $ (clampedAdd *** clampedAdd) p
+ 

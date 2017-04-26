@@ -22,6 +22,7 @@ library
                      , containers
                      , filepath
                      , servant-blaze
+                     , semigroupoids
                      , singletons
                      , directory
                      , servant-server

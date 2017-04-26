@@ -24,12 +24,13 @@ type Velocity = Vector
 data GameState = GameState { positionSys :: ComponentSystem GamePosition
                            , velocitySys :: ComponentSystem Vector
                            , playerSys :: ComponentSystem ()
-                           , boundSys :: ComponentSystem Bounds} 
+                           , boundSys :: ComponentSystem Bounds
+                           , terrainSys :: ComponentSystem ()} 
 
 type PlayerId = EntityId
 
 initialState :: GameState
-initialState = GameState newSystem newSystem newSystem newSystem
+initialState = GameState newSystem newSystem newSystem newSystem newSystem
 
 getDimensions :: (Int, Int)
 getDimensions = let (x, y) = (finiteZero, finiteZero) :: GamePosition 

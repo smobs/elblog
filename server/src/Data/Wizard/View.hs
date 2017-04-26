@@ -19,10 +19,14 @@ data Position = Position Double Double deriving (Generic, Eq, Show)
 data Terrain = Terrain Position Shape deriving (Generic, Eq, Show)
 
 stateToGameView :: GameState -> GameView
-stateToGameView g = GameView [] (toPlayerView <$> getPlayers g) (getDimensions)
+stateToGameView g = GameView (getTerrain g) (toPlayerView <$> getPlayers g) (getDimensions)
 
 getPlayers :: GameState -> [(PlayerId, (GamePosition, Bounds))]
 getPlayers (GameState {..}) = listComponents $ (,) <$> (asMarker playerSys positionSys) <.> boundSys
+
+getTerrain :: GameState -> [Terrain]
+getTerrain GameState{..} = snd <$> (listComponents $ mkTerrain <$> (asMarker terrainSys positionSys) <.> boundSys)
+    where mkTerrain (x, y) (s) = Terrain (Position (getFinite x) (getFinite y)) (boundToShape s)
 
 toPlayerView :: (PlayerId, (GamePosition, Bounds)) -> PlayerView
 toPlayerView (n,((x,y), b)) = 

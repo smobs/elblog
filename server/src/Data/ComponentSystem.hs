@@ -5,7 +5,8 @@ module Data.ComponentSystem (
     updateComponent,
     addComponent,
     deleteComponent,
-    listComponents
+    listComponents,
+    asMarker
     ) where
 
 
@@ -35,3 +36,6 @@ instance Apply ComponentSystem where
 
 listComponents :: ComponentSystem a -> [(EntityId, a)]
 listComponents (CS cs) = M.toList cs
+
+asMarker :: ComponentSystem () -> ComponentSystem b -> ComponentSystem b
+asMarker as bs = liftF2 (flip const) as bs

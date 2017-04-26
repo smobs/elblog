@@ -5,9 +5,7 @@
            , RecordWildCards #-}
 module Data.Wizard where
 
-import GHC.Generics
 import qualified Data.Wizard.Command as Com
-import Data.Text (Text)
 import GHC.TypeLits
 import Data.FiniteDouble
 import Control.Arrow((***))
@@ -18,22 +16,29 @@ type GamePosition = (FiniteDouble 1000, FiniteDouble 500)
 
 type Velocity = Vector
 data GameState = GameState { positionSys :: ComponentSystem GamePosition
-                           , velocitySys :: ComponentSystem Vector} 
+                           , velocitySys :: ComponentSystem Vector
+                           , playerSys :: ComponentSystem ()} 
 
 type PlayerId = EntityId
 
 initialState :: GameState
-initialState = GameState newSystem newSystem
+initialState = GameState newSystem newSystem newSystem
 
 getDimensions :: (Int, Int)
 getDimensions = let (x, y) = (finiteZero, finiteZero) :: GamePosition 
                 in (fromIntegral $ natVal x, fromIntegral $ natVal y)
 
 addPlayer :: PlayerId -> GameState -> GameState
-addPlayer pid g@(GameState{..})= g {positionSys = addComponent pid (finiteZero,finiteZero) positionSys, velocitySys = addComponent pid (0, 0) velocitySys}
+addPlayer pid g@(GameState{..})= let add = addComponent pid in
+    g { positionSys = add (finiteZero,finiteZero) positionSys
+      , velocitySys = add (0, 0) velocitySys
+      , playerSys = add () playerSys}
 
 removePlayer :: PlayerId -> GameState -> GameState
-removePlayer n (GameState poss velocitys) = GameState (deleteComponent n poss) (deleteComponent n velocitys) 
+removePlayer n g@(GameState {..}) = let del = deleteComponent n 
+                                                      in g { positionSys = del positionSys
+                                                           , velocitySys = del velocitySys 
+                                                           , playerSys = del playerSys}
 
 updateGame :: PlayerId -> Com.GameCommand -> GameState -> GameState
 updateGame pId (Com.Move d) g@(GameState{..}) = g {velocitySys = updateComponent (Just . setVelocity 20 d) pId velocitySys}

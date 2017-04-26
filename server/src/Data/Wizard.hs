@@ -13,9 +13,12 @@ import Control.Arrow((***))
 import Data.ComponentSystem
 import Data.Functor.Apply
 type Vector = (Double, Double)
-type GamePosition = (FiniteDouble 1000, FiniteDouble 500)
+type GameWidth = FiniteDouble 1000
+type GameHeight = FiniteDouble 500
+type GamePosition = (GameWidth, GameHeight)
 
-type Bounds = GamePosition
+
+data Bounds = RectangleBound GameWidth GameHeight 
 
 type Velocity = Vector
 data GameState = GameState { positionSys :: ComponentSystem GamePosition
@@ -39,7 +42,7 @@ addPlayer pid g@(GameState{..})= let add = addComponent pid
     g { positionSys = add (finiteZero,finiteZero) positionSys
       , velocitySys = add (0, 0) velocitySys
       , playerSys = add () playerSys
-      , boundSys = add (clampedAdd finiteZero (size), clampedAdd finiteZero (size)) boundSys}
+      , boundSys = add (RectangleBound (clampedAdd finiteZero size) (clampedAdd finiteZero size)) boundSys}
 
 removePlayer :: PlayerId -> GameState -> GameState
 removePlayer n g@(GameState {..}) = let del = deleteComponent n 

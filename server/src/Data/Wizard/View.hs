@@ -25,5 +25,8 @@ getPlayers :: GameState -> [(PlayerId, (GamePosition, Bounds))]
 getPlayers (GameState {..}) = listComponents $ (,) <$> (asMarker playerSys positionSys) <.> boundSys
 
 toPlayerView :: (PlayerId, (GamePosition, Bounds)) -> PlayerView
-toPlayerView (n,((x,y), (w, h))) = 
-        PlayerView (Position (getFinite x) (getFinite y))(Rectangle (getFinite w) (getFinite h)) (Colour 256 0 0) n
+toPlayerView (n,((x,y), b)) = 
+        PlayerView (Position (getFinite x) (getFinite y)) (boundToShape b) (Colour 256 0 0) n
+
+boundToShape :: Bounds -> Shape
+boundToShape (RectangleBound w h) = Rectangle (getFinite w) (getFinite h)

@@ -64,7 +64,7 @@ initial :: State
 initial = { auth: Nothing, login: ""}
 
 type KeyCode = Number
-data Query a = NewGame a | Input KeyCode a | UpdateLogin String a | SetAuth a | UpdateGame GameView a | NoOp a | Close a
+data Query a = NewGame a | Input KeyCode Boolean a | UpdateLogin String a | SetAuth a | UpdateGame GameView a | NoOp a | Close a
 
 type Effects eff = (ajax :: AJAX, channel :: CHANNEL, ref :: REF, ws :: WEBSOCKET, canvas :: CANVAS , console :: CONSOLE | eff)
 
@@ -73,7 +73,8 @@ game = lifecycleComponent {render, eval, initializer: Nothing, finalizer: Just $
             where
               render :: State -> ComponentHTML Query
               render {auth: Just _} = H.div [] [ H.canvas [ P.id_ canvasName
-                                             , E.onKeyDown  (E.input (\ {keyCode} -> Input keyCode))
+                                             , E.onKeyDown  (E.input (\ {keyCode} -> Input keyCode true))
+                                             , E.onKeyUp (E.input (\ {keyCode} -> Input keyCode false ))
                                              , P.tabIndex 0
                                              , P.height $ pixels $ ceil canvasSize.h
                                              , P.width
@@ -83,11 +84,11 @@ game = lifecycleComponent {render, eval, initializer: Nothing, finalizer: Just $
               eval :: Query ~> (ComponentDSL State Query g)
               eval (NewGame a) =
                 pure a
-              eval (Input keyCode a) =do
+              eval (Input keyCode down a) =do
                 st <- get
                 case do 
                     au <- st.auth 
-                    com <- lookupControls keyCode
+                    com <- lookupControls keyCode down
                     pure (Tuple au com) of
                   Nothing -> pure a
                   Just (Tuple t com) -> do 
@@ -206,10 +207,10 @@ sendCommand s a = do
         _ -> Nothing
 
 
-lookupControls :: KeyCode -> Maybe GameCommand
-lookupControls 37.0 = Just $ Move Com.Left
-lookupControls 38.0 = Just $ Move Com.Up
-lookupControls 39.0 = Just $ Move Com.Right
-lookupControls 40.0 = Just $ Move Com.Down
-lookupControls _ = Nothing
+lookupControls :: KeyCode -> Boolean -> Maybe GameCommand
+lookupControls 37.0 d = Just $ (if d then Move else StopMove) Com.Left
+lookupControls 38.0 d = Just $ (if d then Move else StopMove) Com.Up
+lookupControls 39.0 d = Just $ (if d then Move else StopMove) Com.Right
+lookupControls 40.0 d = Just $ (if d then Move else StopMove) Com.Down
+lookupControls _ _ = Nothing
 

@@ -74,7 +74,7 @@ updateGame pId (Com.Configuration Com.RemovePlayer) g =  removePlayer pId g
 
 stepGame :: Double -> GameState -> IO GameState 
 stepGame i g@GameState{..} = do
-    let s' = liftF2 (move i) velocitySys positionSys
+    let s' = updateSys (move i <$>  velocitySys <.>) positionSys
     pure g {positionSys = s'}
 
 setVelocity :: Double -> Com.Direction -> Velocity -> Velocity

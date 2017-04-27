@@ -7,7 +7,8 @@ module Data.ComponentSystem (
     deleteComponent,
     listComponents,
     asMarker,
-    createId
+    createId,
+    updateSys
     ) where
 
 
@@ -44,3 +45,6 @@ asMarker as bs = liftF2 (flip const) as bs
 
 createId :: IO EntityId
 createId = IntId <$> randomIO
+
+updateSys :: (ComponentSystem a -> ComponentSystem a) -> ComponentSystem a -> ComponentSystem a
+updateSys f cs@(CS b) = let CS a = f cs in CS $ M.union a b 

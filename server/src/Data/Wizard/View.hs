@@ -12,25 +12,27 @@ data GameView = GameView {terrain :: [Terrain], players :: [PlayerView], dimensi
 data Colour = Colour Int Int Int deriving (Generic, Eq, Show)
 data PlayerView = PlayerView Position Shape Colour PlayerId deriving (Generic, Eq, Show)
 
-data Shape = Rectangle Double Double deriving (Generic, Eq, Show)
+data Shape = Rectangle Double Double 
+           | Composite Shape Shape deriving (Generic, Eq, Show)
 
 data Position = Position Double Double deriving (Generic, Eq, Show)
 
 data Terrain = Terrain Position Shape deriving (Generic, Eq, Show)
 
 stateToGameView :: GameState -> GameView
-stateToGameView g = GameView (getTerrain g) (toPlayerView <$> getPlayers g) (getDimensions)
+stateToGameView g = GameView (getTerrain g) (getPlayers g) (getDimensions)
 
-getPlayers :: GameState -> [(PlayerId, (GamePosition, Bounds))]
-getPlayers (GameState {..}) = listComponents $ (,) <$> (asMarker playerSys positionSys) <.> boundSys
+getPlayers :: GameState -> [PlayerView]
+getPlayers (GameState {..}) = snd <$> (listComponents $ toPlayerView <$>  playerSys <.> positionSys <.> boundSys)
 
 getTerrain :: GameState -> [Terrain]
 getTerrain GameState{..} = snd <$> (listComponents $ mkTerrain <$> (asMarker terrainSys positionSys) <.> boundSys)
     where mkTerrain (x, y) (s) = Terrain (Position (getFinite x) (getFinite y)) (boundToShape s)
 
-toPlayerView :: (PlayerId, (GamePosition, Bounds)) -> PlayerView
-toPlayerView (n,((x,y), b)) = 
+toPlayerView :: PlayerId -> GamePosition -> Bounds -> PlayerView
+toPlayerView n (x,y) b = 
         PlayerView (Position (getFinite x) (getFinite y)) (boundToShape b) (Colour 256 0 0) n
 
 boundToShape :: Bounds -> Shape
 boundToShape (RectangleBound w h) = Rectangle (getFinite w) (getFinite h)
+boundToShape (CompositeBound s1 s2) = Composite (boundToShape s1) (boundToShape s2) 

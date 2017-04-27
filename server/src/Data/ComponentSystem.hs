@@ -1,6 +1,6 @@
 module Data.ComponentSystem (
     ComponentSystem,
-    EntityId,
+    EntityId(..),
     newSystem,
     updateComponent,
     addComponent,
@@ -14,7 +14,7 @@ import qualified Data.Map.Strict as M
 import Data.Text(Text)
 import Data.Functor.Apply
 
-type EntityId = Text
+data EntityId = TextId Text | IntId Int deriving (Eq, Ord) 
 data ComponentSystem a = CS (M.Map EntityId a) 
 
 newSystem :: ComponentSystem a

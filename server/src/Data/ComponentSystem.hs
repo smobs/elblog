@@ -1,12 +1,13 @@
 module Data.ComponentSystem (
     ComponentSystem,
-    EntityId(..),
+    EntityId(TextId),
     newSystem,
     updateComponent,
     addComponent,
     deleteComponent,
     listComponents,
-    asMarker
+    asMarker,
+    createId
     ) where
 
 
@@ -39,3 +40,7 @@ listComponents (CS cs) = M.toList cs
 
 asMarker :: ComponentSystem () -> ComponentSystem b -> ComponentSystem b
 asMarker as bs = liftF2 (flip const) as bs
+
+createId :: IO EntityId
+createId = do 
+    pure $ IntId 1

@@ -30,11 +30,22 @@ data GameState = GameState { positionSys :: ComponentSystem GamePosition
 
 type PlayerId = T.Text
 
-initialState :: GameState
+initialState :: IO GameState
 initialState = addTerrain $ GameState newSystem newSystem newSystem newSystem newSystem
 
-addTerrain :: GameState -> GameState
-addTerrain g = foldr id g [addTerrainBlock (clampedAdd finiteZero x, clampedAdd finiteZero y) | x <- [50 .. 100], y <- [100 .. 200]]
+addTerrain :: GameState -> IO GameState
+addTerrain g = do  
+    let  ts = [(clampedAdd finiteZero x, clampedAdd finiteZero y) | x <- [50 .. 100], y <- [100 .. 200]]
+    foldr (\p ioG -> ioG >>= (addTerrainBlock p) ) (pure g) ts 
+    
+
+addTerrainBlock :: GamePosition -> GameState -> IO GameState
+addTerrainBlock pos g@GameState{..} = do 
+                                    i <- createId
+                                    let add = addComponent i
+                                    pure $ g { terrainSys = add () terrainSys
+                                             , positionSys = add pos positionSys 
+                                             , boundSys =  add (RectangleBound (clampedAdd finiteZero 1) (clampedAdd finiteZero 1)) boundSys} 
 
 getDimensions :: (Int, Int)
 getDimensions = let (x, y) = (finiteZero, finiteZero) :: GamePosition 
@@ -48,15 +59,6 @@ addPlayer pid g@(GameState{..})= let add = addComponent (TextId pid)
       , velocitySys = add (0, 0) velocitySys
       , playerSys = add pid playerSys
       , boundSys = add (RectangleBound (clampedAdd finiteZero size) (clampedAdd finiteZero size)) boundSys}
-
-
-
-addTerrainBlock :: GamePosition -> GameState -> GameState
-addTerrainBlock pos g@GameState{..} = let add = addComponent  (TextId $ T.pack "TerrainId")
-                                    in g { terrainSys = add () terrainSys
-                                         , positionSys = add pos positionSys 
-                                         , boundSys =  add (RectangleBound (clampedAdd finiteZero 1) (clampedAdd finiteZero 1)) boundSys} 
-
 
 
 removePlayer :: PlayerId -> GameState -> GameState

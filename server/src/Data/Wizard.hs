@@ -34,7 +34,7 @@ initialState = addTerrain $ GameState newSystem newSystem newSystem newSystem ne
 
 addTerrain :: GameState -> IO GameState
 addTerrain g = do  
-    let  ts = [(clampedAdd finiteZero x, clampedAdd finiteZero y) | x <- [50 .. 100], y <- [100 .. 200]]
+    let  ts = [(clampedAdd finiteZero x, clampedAdd finiteZero y) | x <- [300 .. 500], y <- [0 .. x]]
     foldr (\p ioG -> ioG >>= (addTerrainBlock p) ) (pure g) ts 
     
 

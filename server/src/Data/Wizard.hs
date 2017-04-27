@@ -18,8 +18,7 @@ type GameHeight = FiniteDouble 500
 type GamePosition = (GameWidth, GameHeight)
 
 
-data Bounds = RectangleBound GameWidth GameHeight 
-              | CompositeBound Bounds Bounds
+data Bounds = RectangleBound GameWidth GameHeight
 
 type Velocity = Vector
 data GameState = GameState { positionSys :: ComponentSystem GamePosition

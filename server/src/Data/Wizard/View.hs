@@ -12,8 +12,7 @@ data GameView = GameView {terrain :: [Terrain], players :: [PlayerView], dimensi
 data Colour = Colour Int Int Int deriving (Generic, Eq, Show)
 data PlayerView = PlayerView Position Shape Colour PlayerId deriving (Generic, Eq, Show)
 
-data Shape = Rectangle Double Double 
-           | Composite Shape Shape deriving (Generic, Eq, Show)
+data Shape = Rectangle Double Double deriving (Generic, Eq, Show)
 
 data Position = Position Double Double deriving (Generic, Eq, Show)
 
@@ -35,4 +34,3 @@ toPlayerView n (x,y) b =
 
 boundToShape :: Bounds -> Shape
 boundToShape (RectangleBound w h) = Rectangle (getFinite w) (getFinite h)
-boundToShape (CompositeBound s1 s2) = Composite (boundToShape s1) (boundToShape s2) 

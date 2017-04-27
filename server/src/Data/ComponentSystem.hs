@@ -14,6 +14,7 @@ module Data.ComponentSystem (
 import qualified Data.Map.Strict as M
 import Data.Text(Text)
 import Data.Functor.Apply
+import System.Random
 
 data EntityId = TextId Text | IntId Int deriving (Eq, Ord) 
 data ComponentSystem a = CS (M.Map EntityId a) 
@@ -42,5 +43,4 @@ asMarker :: ComponentSystem () -> ComponentSystem b -> ComponentSystem b
 asMarker as bs = liftF2 (flip const) as bs
 
 createId :: IO EntityId
-createId = do 
-    pure $ IntId 1
+createId = IntId <$> randomIO

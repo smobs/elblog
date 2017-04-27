@@ -28,6 +28,7 @@ library
                      , servant-server
                      , servant-subscriber
                      , text
+                     , random
 
   default-language:    Haskell2010
 

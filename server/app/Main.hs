@@ -49,7 +49,8 @@ main = do
   cd <- atomically (makeSubscriber "subscriber" runStderrLoggingT)
   mref <- newIORef [ChatMessage "System" "First post!!!1!1!"]
   gcref <- atomically $ newTVar []
-  gvref <- atomically $ newTVar (stateToGameView initialState)
+  initialView <- stateToGameView <$> initialState
+  gvref <- atomically $ newTVar initialView
   _ <- forkIO $ gameSystem gcref (\ x -> do 
     atomically $ writeTVar gvref x
     notifyGameView cd)

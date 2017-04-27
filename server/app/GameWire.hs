@@ -17,7 +17,8 @@ type Output = GameView
 gameSystem :: TVar Input -> (Output -> IO ()) -> IO ()
 gameSystem ref o = do 
     t <- getCurrentTime
-    gameLoop ref o initialState t
+    i <- initialState
+    gameLoop ref o i t
 
 
 readAndEmpty :: Monoid a => TVar a -> STM a

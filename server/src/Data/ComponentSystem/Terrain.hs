@@ -75,4 +75,10 @@ updateTerrain g@GameState{..} = let Points ts dirty = terrainState
 
 
 newTerrainState :: TerrainState
-newTerrainState = Points (S.fromList [(x,y) | x <- [0 .. 1000], y <- [0 .. 500 - x], mod x 10 == 0, mod y 10 == 0]) True
+newTerrainState = Points (S.fromList [(x,y) | x <- [0 .. 1000], y <- [0 .. 500], mod x 10 == 0, mod y 10 == 0, gradient x < y ]) True
+
+gradient :: Int -> Int
+gradient x = (-200) + if x < 500
+             then 500 - (div x 2)
+             else div x 2
+             

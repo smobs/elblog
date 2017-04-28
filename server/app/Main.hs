@@ -6,7 +6,7 @@ module Main where
 import Data.Wizard
 import Data.Wizard.View
 import Data.Wizard.Command
-
+import Data.Wizard.Model
 import GHC.IO.Encoding
 import           Control.Monad.IO.Class   (liftIO)
 import           Control.Monad.Trans.Reader
@@ -49,7 +49,7 @@ main = do
   cd <- atomically (makeSubscriber "subscriber" runStderrLoggingT)
   mref <- newIORef [ChatMessage "System" "First post!!!1!1!"]
   gcref <- atomically $ newTVar []
-  initialView <- stateToGameView <$> initialState
+  let initialView = stateToGameView $ initialState
   gvref <- atomically $ newTVar initialView
   _ <- forkIO $ gameSystem gcref (\ x -> do 
     atomically $ writeTVar gvref x

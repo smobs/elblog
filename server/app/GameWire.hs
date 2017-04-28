@@ -4,6 +4,7 @@ module GameWire where
 import Data.Wizard
 import Data.Wizard.View
 import qualified Data.Wizard.Command as Com
+import Data.Wizard.Model
 import Prelude hiding ((.), id)
 import Control.Concurrent.STM
 import Control.Concurrent
@@ -16,8 +17,8 @@ type Output = GameView
 
 gameSystem :: TVar Input -> (Output -> IO ()) -> IO ()
 gameSystem ref o = do 
-    t <- getCurrentTime
-    i <- initialState
+    t <- getCurrentTime 
+    let i = initialState
     gameLoop ref o i t
 
 

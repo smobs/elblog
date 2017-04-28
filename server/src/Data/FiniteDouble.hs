@@ -18,6 +18,7 @@ module Data.FiniteDouble (
     packBoundedDouble,
     toBoundedDouble,
     clampedAdd,
+    clampedCast,
     finiteZero
     ) where
 
@@ -67,13 +68,15 @@ packBoundedDouble i x = case (toSing i) of
 toBoundedDouble :: Double -> BoundedDouble
 toBoundedDouble d = fromJust $ packBoundedDouble (ceiling d) d 
 
+clampedCast :: (KnownNat n ) => Double -> FiniteDouble n
+clampedCast = clampedAdd finiteZero
 
 clampedAdd :: KnownNat n => FiniteDouble n -> Double -> FiniteDouble n
 clampedAdd f d = let bd = toBoundedDouble $ abs d 
                  in if d < 0 
                     then clampedSubtract f bd
                     else clampedAdd' f bd
-
+ 
 clampedAdd' :: KnownNat n => FiniteDouble n -> BoundedDouble -> FiniteDouble n
 clampedAdd' f@(FiniteDouble x) (BDouble (FiniteDouble y)) = case packFinite (x + y) of
      Nothing -> unsafePackFinite $ fromIntegral $ natVal f

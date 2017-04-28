@@ -6,45 +6,17 @@
 module Data.Wizard where
 
 import qualified Data.Wizard.Command as Com
+import Data.Wizard.Model
 import qualified Data.Text as T
 import GHC.TypeLits
 import Data.FiniteDouble
 import Control.Arrow((***))
 import Data.ComponentSystem
 import Data.Functor.Apply
-type Vector = (Double, Double)
-type GameWidth = FiniteDouble 1000
-type GameHeight = FiniteDouble 500
-type GamePosition = (GameWidth, GameHeight)
+import Data.ComponentSystem.Terrain
 
-
-data Bounds = RectangleBound GameWidth GameHeight
-
-type Velocity = Vector
-data GameState = GameState { positionSys :: ComponentSystem GamePosition
-                           , velocitySys :: ComponentSystem Vector
-                           , playerSys :: ComponentSystem PlayerId
-                           , boundSys :: ComponentSystem Bounds
-                           , terrainSys :: ComponentSystem ()} 
-
-type PlayerId = T.Text
-
-initialState :: IO GameState
-initialState = addTerrain $ GameState newSystem newSystem newSystem newSystem newSystem
-
-addTerrain :: GameState -> IO GameState
-addTerrain g = do  
-    let  ts = [(clampedAdd finiteZero x, clampedAdd finiteZero y) | x <- [0 .. 1000], y <- [499 .. 500]]
-    foldr (\p ioG -> ioG >>= (addTerrainBlock p) ) (pure g) ts 
-    
-
-addTerrainBlock :: GamePosition -> GameState -> IO GameState
-addTerrainBlock pos g@GameState{..} = do 
-                                    i <- createId
-                                    let add = addComponent i
-                                    pure $ g { terrainSys = add () terrainSys
-                                             , positionSys = add pos positionSys 
-                                             , boundSys =  add (RectangleBound (clampedAdd finiteZero 1) (clampedAdd finiteZero 1)) boundSys} 
+initialState :: GameState
+initialState =  emptyGameState {terrainState = newTerrainState}
 
 getDimensions :: (Int, Int)
 getDimensions = let (x, y) = (finiteZero, finiteZero) :: GamePosition 
@@ -57,7 +29,7 @@ addPlayer pid g@(GameState{..})= let add = addComponent (TextId pid)
     g { positionSys = add (finiteZero,finiteZero) positionSys
       , velocitySys = add (0, 0) velocitySys
       , playerSys = add pid playerSys
-      , boundSys = add (RectangleBound (clampedAdd finiteZero size) (clampedAdd finiteZero size)) boundSys}
+      , boundSys = add (RectangleBound (clampedCast size) (clampedCast size)) boundSys}
 
 
 removePlayer :: PlayerId -> GameState -> GameState
@@ -74,8 +46,8 @@ updateGame pId (Com.Configuration Com.RemovePlayer) g =  removePlayer pId g
 
 stepGame :: Double -> GameState -> IO GameState 
 stepGame i g@GameState{..} = do
-    let s' = updateSys (move i <$>  velocitySys <.>) positionSys
-    pure g {positionSys = s'}
+    let g' = g {positionSys = updateSys (move i <$>  velocitySys <.>) positionSys}
+    updateTerrain g'
 
 setVelocity :: Double -> Com.Direction -> Velocity -> Velocity
 setVelocity speed d (x,y) = case d of

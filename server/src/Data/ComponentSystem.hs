@@ -8,7 +8,8 @@ module Data.ComponentSystem (
     listComponents,
     asMarker,
     createId,
-    updateSys
+    updateSys,
+    clearSys
     ) where
 
 
@@ -17,7 +18,7 @@ import Data.Text(Text)
 import Data.Functor.Apply
 import System.Random
 
-data EntityId = TextId Text | IntId Int deriving (Eq, Ord) 
+data EntityId = TextId Text | IntId Int deriving (Eq, Ord, Show) 
 data ComponentSystem a = CS (M.Map EntityId a) 
 
 newSystem :: ComponentSystem a
@@ -47,4 +48,7 @@ createId :: IO EntityId
 createId = IntId <$> randomIO
 
 updateSys :: (ComponentSystem a -> ComponentSystem a) -> ComponentSystem a -> ComponentSystem a
-updateSys f cs@(CS b) = let CS a = f cs in CS $ M.union a b 
+updateSys f cs@(CS b) = let CS a = f cs in CS $ M.union a b
+
+clearSys :: (ComponentSystem a -> ComponentSystem a) -> ComponentSystem a -> ComponentSystem a
+clearSys f cs@(CS b) = let CS a = f cs in CS $ M.difference b a

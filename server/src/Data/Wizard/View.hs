@@ -6,6 +6,7 @@ import Data.Wizard
 import Data.FiniteDouble
 import Data.ComponentSystem
 import Data.Functor.Apply((<.>))
+import Data.Wizard.Model
 
 data GameView = GameView {terrain :: [Terrain], players :: [PlayerView], dimensions :: (Int, Int)} deriving (Generic, Eq, Show)
 
@@ -16,24 +17,13 @@ data Shape = Rectangle Double Double deriving (Generic, Eq, Show)
 
 data Position = Position Double Double deriving (Generic, Eq, Show)
 
-instance  Ord Position where
-    compare (Position x y) (Position a b) = compare (x + y) (a + b)
-
 data Terrain = Terrain Position Shape deriving (Generic, Eq, Show)
 
 stateToGameView :: GameState -> GameView
-stateToGameView g = GameView (mergeTerrain $ getTerrain g) (getPlayers g) (getDimensions)
+stateToGameView g = GameView (getTerrain g) (getPlayers g) (getDimensions)
 
 getPlayers :: GameState -> [PlayerView]
 getPlayers (GameState {..}) = snd <$> (listComponents $ toPlayerView <$>  playerSys <.> positionSys <.> boundSys)
-
-
-mergeTerrain :: [Terrain] -> [Terrain]
-mergeTerrain ts = let ps = (\(Terrain p _) -> p) <$> ts
-                      Position minX minY = minimum ps
-                      Position maxX maxY = maximum ps
-                   in
-    [Terrain (Position (maxX + minX / 2) (maxY + minY /2)) (Rectangle (maxX - minX) (maxY - minY))]
 
 getTerrain :: GameState -> [Terrain]
 getTerrain GameState{..} = snd <$> (listComponents $ mkTerrain <$> (asMarker terrainSys positionSys) <.> boundSys)

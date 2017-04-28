@@ -15,7 +15,16 @@ cabal-version:       >=1.10
 
 library
   hs-source-dirs:      src
-  exposed-modules:     PSApp, System.BlogRepository, WebApi, Data.Wizard.View, Data.Wizard.Command, Data.Wizard, Data.FiniteDouble, Data.ComponentSystem
+  exposed-modules:     PSApp
+                       , System.BlogRepository
+                       , WebApi
+                       , Data.Wizard.View
+                       , Data.Wizard.Command
+                       , Data.Wizard
+                       , Data.Wizard.Model
+                       , Data.FiniteDouble
+                       , Data.ComponentSystem
+                       , Data.ComponentSystem.Terrain
   build-depends:       base >= 4.7 && < 5
                      , blaze-html
                      , blaze-markup

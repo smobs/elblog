@@ -36,35 +36,31 @@ instance eqMarkdownSlot :: Eq MarkdownSlot where
 type SlamS = SlamDownState String
 type SlamQ = SlamDownQuery String
 
-type FState g = ParentState State SlamS Query SlamQ g MarkdownSlot
-type FQuery = Coproduct Query (ChildF MarkdownSlot SlamQ)
-type ArticleHTML g = ParentHTML SlamS Query SlamQ g MarkdownSlot
-type ArticleDSL g = ParentDSL State SlamS Query SlamQ g MarkdownSlot
 
-article :: forall g. (Functor g) => Component (FState g) FQuery g
-article = parentComponent {render, eval, peek: Nothing}
+article :: forall g . Component H.HTML Query Article Void g
+article = parentComponent { initialState: id
+                          , render
+                          , eval
+                          , receiver: const Nothing}
   where
-
-  render :: State -> ArticleHTML g
+  render :: State -> ParentHTML Query SlamQ MarkdownSlot g
   render (Article state) =
     let title = H.button [ E.onClick (E.input_ Toggle)
                          , P.classes [Pure.u 1 1, Pure.button, Pure.buttonPrimary]]
-                [H.text state.title] in
-    H.div [P.class_ Pure.grid]
-      if state.visible
-      then
-        [ title
-        , H.div [P.class_ $ Pure.u 1 1] [H.slot MarkdownSlot \_ ->
-                                                      { initialState: (case (parseMd state.contents) of
-                                                           Right slam -> replaceDocument slam
-                                                           Left _ -> id)
-                                                           emptySlamDownState
-                                                      , component: slamDownComponent {browserFeatures: defaultBrowserFeatures, formName: "article-markdown-form"}}]
-        ]
-      else
-         [title]
-
-  eval ::  Query ~> (ArticleDSL g)
+                [H.text state.title] 
+    in
+      H.div [P.class_ Pure.grid]
+        if state.visible
+        then [ title
+             , H.div [P.class_ $ Pure.u 1 1] 
+                [ H.slot MarkdownSlot 
+                    (slamDownComponent {browserFeatures: defaultBrowserFeatures, formName: "article-markdown-form"}) 
+                    unit
+                    (const Nothing)]
+             ]
+        else [title]
+  
+  eval ::  Query ~> ParentDSL State Query SlamQ MarkdownSlot Void g
   eval (Toggle next) = do
     modify (\(Article s)-> Article (s {visible = not s.visible}))
     pure next

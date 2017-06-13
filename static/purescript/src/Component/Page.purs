@@ -13,8 +13,8 @@ import Component.Pong as Pong
 import Component.Game as Game
 import HTML.Components as C
 import Halogen.HTML.CSS.PureCSS as Pure
-import Halogen.HTML.Indexed as H
-import Halogen.HTML.Properties.Indexed as P
+import Halogen.HTML as H
+import Halogen.HTML.Properties as P
 import Component.Chat (chat)
 import Control.Monad.Aff.Console (CONSOLE)
 import Control.Monad.Eff.Ref (REF)

@@ -11,8 +11,8 @@ import Control.Monad.Reader.Trans (runReaderT)
 import Data.Argonaut.Generic.Aeson (decodeJson, encodeJson)
 import Data.Generic (class Generic, gCompare, gEq, gShow)
 import Component.Article as Article
-import Halogen.HTML.Indexed as H
-import Halogen.HTML.Properties.Indexed as P
+import Halogen.HTML as H
+import Halogen.HTML.Properties as P
 import Component.Article (article)
 import Data.Either (Either(..))
 import Data.Functor.Coproduct (Coproduct)

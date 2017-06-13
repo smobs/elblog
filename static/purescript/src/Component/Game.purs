@@ -14,9 +14,9 @@ import DOM.HTML.Location
 import Graphics.Game
 import Component.LoginWidget as Login
 import Data.Wizard.Command as Com
-import Halogen.HTML.Events.Indexed as E
-import Halogen.HTML.Indexed as H
-import Halogen.HTML.Properties.Indexed as P
+import Halogen.HTML.Events as E
+import Halogen.HTML as H
+import Halogen.HTML.Properties as P
 import Servant.Subscriber as Subscribe
 import Signal.Channel as Chan
 import WebAPI.Subscriber as Sub

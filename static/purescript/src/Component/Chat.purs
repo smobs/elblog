@@ -5,9 +5,9 @@ import WebAPI.Settings
 import WebAPI
 import Chat.ServerTypes
 import Component.LoginWidget as Login
-import Halogen.HTML.Events.Indexed as E
-import Halogen.HTML.Indexed as H
-import Halogen.HTML.Properties.Indexed as P
+import Halogen.HTML.Events as E
+import Halogen.HTML as H
+import Halogen.HTML.Properties as P
 import Servant.Subscriber as Subscribe
 import Signal.Channel as Chan
 import WebAPI.Subscriber as Sub
@@ -34,8 +34,8 @@ import Data.String (take)
 import Halogen (Component, ComponentDSL, ComponentHTML, EventSource, HalogenEffects, action, eventSource, liftH, modify, subscribe)
 import Halogen.Component (lifecycleComponent)
 import Halogen.HTML.Events (onChange)
-import Halogen.HTML.Events.Indexed (input_, onClick, onInput, onKeyPress, onSubmit)
-import Halogen.HTML.Indexed (button, input, textarea)
+import Halogen.HTML.Events (input_, onClick, onInput, onKeyPress, onSubmit)
+import Halogen.HTML (button, input, textarea)
 import Halogen.Query (get, set)
 import Network.HTTP.Affjax (AJAX)
 import Servant.PureScript.Affjax (errorToString)

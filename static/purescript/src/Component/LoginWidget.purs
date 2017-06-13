@@ -4,9 +4,9 @@ import Chat.ServerTypes
 import Prelude
 import Data.Maybe (Maybe(..))  
 
-import Halogen.HTML.Events.Indexed as E
-import Halogen.HTML.Indexed as H
-import Halogen.HTML.Properties.Indexed as P
+import Halogen.HTML.Events as E
+import Halogen.HTML as H
+import Halogen.HTML.Properties as P
 
 type State = {auth :: Maybe AuthToken, login :: String}
 

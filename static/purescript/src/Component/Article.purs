@@ -4,9 +4,9 @@ import Prelude
 import Halogen
 
 import Halogen.HTML.Core (className)
-import Halogen.HTML.Indexed as H
-import Halogen.HTML.Events.Indexed as E
-import Halogen.HTML.Properties.Indexed as P
+import Halogen.HTML as H
+import Halogen.HTML.Events as E
+import Halogen.HTML.Properties as P
 import Halogen.HTML.CSS.PureCSS as Pure
 import Data.Functor.Coproduct (Coproduct())
 

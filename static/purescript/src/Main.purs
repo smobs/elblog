@@ -11,7 +11,7 @@ import Data.Maybe (Maybe)
 import Data.Tuple (Tuple(..))
 import Data.Functor.Coproduct (left)
 import Halogen (HalogenEffects, Driver, action, parentState, runUI)
-import Halogen.Util (awaitBody, runHalogenAff)
+import Halogen.Aff (awaitBody, runHalogenAff)
 
 import Routing (matchesAff)
 import Routing.Match (Match)

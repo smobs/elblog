@@ -3,7 +3,6 @@ module Component.Article where
 import Prelude
 import Halogen
 
-import Halogen.HTML.Core (className)
 import Halogen.HTML as H
 import Halogen.HTML.Events as E
 import Halogen.HTML.Properties as P

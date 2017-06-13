@@ -2,31 +2,31 @@ module Halogen.HTML.CSS.PureCSS where
 
 import Prelude
 
-import Halogen.HTML.Core (className, ClassName, HTML, Prop)
+import Halogen.HTML.Core (ClassName(..), HTML, Prop)
 
 grid :: ClassName
-grid = className "pure-g"
+grid = ClassName "pure-g"
 
 u :: Int -> Int -> ClassName
-u i n = className $ "pure-u-" <> (show i) <> "-" <> (show n)
+u i n = ClassName $ "pure-u-" <> (show i) <> "-" <> (show n)
 
 button :: ClassName
-button = className "pure-button"
+button = ClassName "pure-button"
 
 buttonPrimary :: ClassName
-buttonPrimary = className "pure-button-primary"
+buttonPrimary = ClassName "pure-button-primary"
 
 horizontalMenu :: Array ClassName
-horizontalMenu = map className ["pure-menu", "pure-menu-horizontal"]
+horizontalMenu = map ClassName ["pure-menu", "pure-menu-horizontal"]
 
 menuLink :: ClassName
-menuLink = className "pure-menu-link"
+menuLink = ClassName "pure-menu-link"
 
 menuHeading :: ClassName
-menuHeading = className "pure-menu-heading"
+menuHeading = ClassName "pure-menu-heading"
 
 menuItem :: ClassName
-menuItem = className "pure-menu-item"
+menuItem = ClassName "pure-menu-item"
 
 menuList :: ClassName
-menuList = className "pure-menu-list"
+menuList = ClassName "pure-menu-list"

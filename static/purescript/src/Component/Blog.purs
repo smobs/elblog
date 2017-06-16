@@ -2,7 +2,7 @@ module Component.Blog where
 
 import Prelude
 import Halogen
-import Model (Article(..), ArticleId, BlogState, initialArticle)
+import Model (Article(..), ArticleId, BlogState, initialArticle, initialBlog)
 import Control.Monad.Aff (Aff)
 import Control.Monad.Aff.Class (class MonadAff, liftAff)
 
@@ -31,38 +31,45 @@ instance eqArticleSlot :: Eq ArticleSlot where eq = gEq
 instance ordArticleSlot :: Ord ArticleSlot where compare = gCompare
 
 type BlogEffects eff = (ajax :: AJAX | eff)
+type BlogAff eff = Aff (BlogEffects eff)
 
 type State = BlogState
 data Query a =
   Load a
 
-type FState g = ParentState BlogState(Article.FState g) Query Article.FQuery g ArticleSlot
-type FQuery = Coproduct Query (ChildF ArticleSlot Article.FQuery)
-type BlogDSL g = ParentDSL State (Article.FState g) Query Article.FQuery g ArticleSlot
-type BlogHTML g = ParentHTML (Article.FState g) Query Article.FQuery g ArticleSlot
+type BlogHTML eff = ParentHTML Query Article.Query ArticleSlot (BlogAff eff)
+type BlogDSL eff = ParentDSL State Query Article.Query ArticleSlot Void (BlogAff eff)
+
 -- | The component definition9
-blog :: forall a eff. (Functor a, MonadAff (HalogenEffects(BlogEffects eff)) a) =>  Component (FState a) FQuery a
-blog = lifecycleParentComponent {render, eval, peek: Nothing, initializer: Just (action Load), finalizer: Nothing}
+blog :: forall eff. Component H.HTML Query Unit Void (BlogAff eff)
+blog = lifecycleParentComponent { initialState: const initialBlog
+                                , render
+                                , eval
+                                , receiver: const Nothing 
+                                , initializer: Just (action Load)
+                                , finalizer: Nothing}
   where
-    render :: State -> BlogHTML a
+    render :: State -> BlogHTML eff
     render state =
       H.div_
       (map renderArticle state.articles)
       
 
-    eval :: Query ~> (BlogDSL a)
+    eval :: Query ~> BlogDSL eff
     eval (Load a) = do
-      bs <-  liftH <<< liftH <<< liftAff $ getBlogs
+      bs <- liftAff $ getBlogs
       let ids = map (\(Article b) -> {id: b.id, title: b.title, contents: b.contents}) bs
       modify (\s -> s {articles = ids})
       pure a
     
 
-    renderArticle :: {title :: String, contents :: String, id :: ArticleId} -> BlogHTML a
+    renderArticle :: {title :: String, contents :: String, id :: ArticleId} -> BlogHTML eff
     renderArticle ar = H.slot
                        (ArticleSlot (ar.id))
-                       \_ -> { initialState: parentState $ initialArticle ar.id ar.title ar.contents
-                             , component: article}
+                       article
+                       (initialArticle ar.id ar.title ar.contents)
+                       (const Nothing)
+
 
 getBlogs :: forall eff. Aff (ajax :: AJAX | eff) (Array Article)
 getBlogs = do

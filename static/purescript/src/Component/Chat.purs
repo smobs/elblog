@@ -14,6 +14,7 @@ import WebAPI.Subscriber as Sub
 import Control.Category ((<<<))
 import Control.Monad (class Monad, pure, bind)
 import Control.Monad.Aff (Aff)
+import Control.Monad.Aff.AVar(AVAR)
 import Control.Monad.Aff.Class (class MonadAff, liftAff)
 import Control.Monad.Aff.Console (error)
 import Control.Monad.Aff.Free (class Affable)
@@ -31,13 +32,13 @@ import Data.Monoid (append)
 import Data.NaturalTransformation (type (~>))
 import Data.Semigroup ((<>))
 import Data.String (take)
-import Halogen (Component, ComponentDSL, ComponentHTML, EventSource, HalogenEffects, action, eventSource, liftH, modify, subscribe)
+import Halogen (Component, ComponentDSL, ComponentHTML, EventSource, SubscribeStatus(Listening), action, eventSource, modify, subscribe, get, put)
 import Halogen.Component (lifecycleComponent)
 import Halogen.HTML.Events (onChange)
 import Halogen.HTML.Events (input_, onClick, onInput, onKeyPress, onSubmit)
 import Halogen.HTML (button, input, textarea)
-import Halogen.Query (get, set)
 import Network.HTTP.Affjax (AJAX)
+import Halogen.Component
 import Servant.PureScript.Affjax (errorToString)
 import Servant.Subscriber (Subscriber, SubscriberEff, makeSubscriber)
 import Servant.Subscriber.Connection (Config)
@@ -57,42 +58,36 @@ initial = {cur: "", text: [], sub: false, auth: Nothing, login: ""}
 
 data Query a = Connect a | Disconnect a | UpdateText (Array ChatMessage) a | SendMessage a | UpdateCurrent String a | SetAuth a | UpdateLogin String a
 
-type Effects  eff = (ajax :: AJAX, channel :: CHANNEL, ref :: REF, ws :: WEBSOCKET | eff)
+type Effects  eff = (ajax :: AJAX, channel :: CHANNEL, ref :: REF, ws :: WEBSOCKET, avar :: AVAR, dom :: DOM, err :: EXCEPTION | eff)
 
-onlyForKey :: forall props g ev.                       
-  (Functor g) => Number                      
-                   -> ({ "keyCode" :: Number  
-                       | props                  
-                       }                      
-                       -> g (Maybe ev)     
-                      )                       
-                      -> { "keyCode" :: Number
-                         | props                
-                         }
-                         -> g (Maybe ev)
-onlyForKey i input  = (\ (a@{keyCode}) -> (if keyCode == 13.0 then id else const Nothing) <$> input a)
-
-chat :: forall g eff. (Monad g, Affable (HalogenEffects(Effects eff)) g, MonadAff (HalogenEffects(Effects eff)) g) => Component State Query g 
-chat = lifecycleComponent {render, eval, initializer: Just (action Connect), finalizer: Just (action Disconnect)}
+chat :: forall eff. Component H.HTML Query Unit Void (Aff (Effects eff)) 
+chat = lifecycleComponent spec
         where 
+              spec :: LifecycleComponentSpec H.HTML State Query Unit Void (Aff (Effects eff))
+              spec = { initialState: const initial 
+                     , render
+                     , eval
+                     , receiver: const Nothing
+                     , initializer: Just (action Connect)
+                     , finalizer: Just (action Disconnect)}
               render :: State -> ComponentHTML Query
               render {text, cur, sub, auth: Just _ } = H.div_ $ 
                     append (if not sub 
                         then []
                         else [ H.input [ P.value cur
                                        , E.onValueInput (E.input UpdateCurrent)
-                                       , E.onKeyPress  (onlyForKey 13.0 (E.input_ SendMessage))
+                                       , E.onKeyPress  ((E.input_ SendMessage))
                                        ]
                             , H.button [E.onClick (E.input_ SendMessage)] [H.text "Send"]])
                         $ (\(ChatMessage t) -> H.div_ [H.text (t.userName <> ": " <> t.messageBody)]) <$> text
               render _ = Login.render UpdateLogin SetAuth
-              eval :: Query ~> (ComponentDSL State Query g)
+              eval :: Query ~> ComponentDSL State Query Void (Aff (Effects eff))
               eval (Connect a) = do
                 st <- get
                 case st.auth of
                   Nothing -> pure a
                   Just token -> do
-                    sub <- liftH $ liftEff (initSubscriber token)
+                    sub <- liftEff (initSubscriber token)
                     subscribe (chatMessages sub.messages)
                     modify (\s -> s {sub = true})    
                     pure a
@@ -105,7 +100,7 @@ chat = lifecycleComponent {render, eval, initializer: Just (action Connect), fin
                 case st.auth of
                   Nothing -> pure a
                   Just t -> do 
-                       merr <- liftH <<< liftAff $ sendMessage st.cur t
+                       merr <- liftAff $ sendMessage st.cur t
                        case merr of
                            Just err -> do modify (\s ->  s {text= append [systemMessage err] s.text})
                                           pure a
@@ -120,8 +115,8 @@ chat = lifecycleComponent {render, eval, initializer: Just (action Connect), fin
               eval (SetAuth a) = do
                 st <- get
                 let t = (AuthToken st.login)
-                set $ st {auth = Just t}
-                sub <- liftH $ liftEff $ initSubscriber t 
+                put $ st {auth = Just t}
+                sub <- liftEff $ initSubscriber t 
                 subscribe (chatMessages sub.messages)
                 modify (\s -> s {sub = true})
                 pure a
@@ -193,7 +188,7 @@ callback sig eff = do
 systemMessage :: String -> ChatMessage
 systemMessage s = ChatMessage {userName: "System", messageBody: s}
 
-chatMessages ::  forall g eff. (Monad g, Affable (HalogenEffects(Effects eff)) g) => Signal Action ->  EventSource Query g
+chatMessages ::  forall eff.  Signal Action ->  EventSource Query (Aff(Effects eff))
 chatMessages sig = eventSource (callback sig) (\a -> case a of
             Update s -> f $ UpdateText s
             Nop -> f $ UpdateText [systemMessage "No op"]
@@ -201,7 +196,8 @@ chatMessages sig = eventSource (callback sig) (\a -> case a of
             SubscriberLog s -> f $ UpdateText [systemMessage s]
         )
         where 
-            f x = pure $ action x
+            f :: (SubscribeStatus -> Query SubscribeStatus) -> Maybe (Query SubscribeStatus)
+            f x = Just $ x Listening
 
 
 sendMessage :: forall eff. String -> AuthToken -> Aff (ajax :: AJAX | eff) (Maybe String)

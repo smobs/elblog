@@ -45,10 +45,9 @@ import Data.Semigroup ((<>))
 import Data.Tuple (Tuple(..))
 import Data.Wizard.Command (GameCommand(..))
 import Graphics.Canvas (CANVAS)
-import Halogen (ComponentDSL, ComponentHTML, Component, HalogenEffects, action, liftH, get, modify, subscribe, eventSource, eventSource_, EventSource)
-import Halogen.Component (lifecycleComponent)
-import Halogen.HTML.Properties (pixels)
-import Halogen.Query (get, set)
+import Halogen (ComponentDSL, ComponentHTML, SubscribeStatus(Listening), Component, action, get, modify, subscribe, eventSource, eventSource_, EventSource)
+import Halogen.Component (lifecycleComponent, LifecycleComponentSpec)
+import Halogen.Query (get, put)
 import Network.HTTP.Affjax (AJAX)
 import Servant.PureScript.Affjax (errorToString)
 import Servant.Subscriber (Subscriber, SubscriberEff, makeSubscriber)
@@ -57,6 +56,8 @@ import Servant.Subscriber.Internal (doCallback)
 import Signal (Signal, runSignal)
 import Signal.Channel (Channel, send, channel, CHANNEL)
 import WebSocket (WEBSOCKET)
+import Control.Monad.Aff.AVar(AVAR)
+import DOM.Event.KeyboardEvent as K
 
 type State = {auth :: Maybe AuthToken, login :: String}
 
@@ -64,35 +65,41 @@ initial :: State
 initial = { auth: Nothing, login: ""}
 
 type KeyCode = Number
-data Query a = NewGame a | Input KeyCode Boolean a | UpdateLogin String a | SetAuth a | UpdateGame GameView a | NoOp a | Close a
+data Query a = NewGame a | Input K.KeyboardEvent Boolean a | UpdateLogin String a | SetAuth a | UpdateGame GameView a | NoOp a | Close a
 
-type Effects eff = (ajax :: AJAX, channel :: CHANNEL, ref :: REF, ws :: WEBSOCKET, canvas :: CANVAS , console :: CONSOLE | eff)
+type Effects eff = (ajax :: AJAX, channel :: CHANNEL, ref :: REF, ws :: WEBSOCKET, canvas :: CANVAS , console :: CONSOLE, avar :: AVAR, dom :: DOM, err :: EXCEPTION | eff)
 
-game :: forall g eff. (Monad g, Affable (HalogenEffects(Effects eff)) g, MonadAff (HalogenEffects(Effects eff)) g) => Component State Query g 
-game = lifecycleComponent {render, eval, initializer: Nothing, finalizer: Just $ action Close}
+game :: forall eff. Component H.HTML Query Unit Void (Aff (Effects eff)) 
+game = lifecycleComponent spec
             where
+              spec :: LifecycleComponentSpec H.HTML State Query Unit Void (Aff (Effects eff))
+              spec = { initialState: const initial 
+                     , render
+                     , eval
+                     , receiver: const Nothing
+                     , initializer: Nothing
+                     , finalizer: Just $ action Close}
               render :: State -> ComponentHTML Query
               render {auth: Just _} = H.div [] [ H.canvas [ P.id_ canvasName
-                                             , E.onKeyDown  (E.input (\ {keyCode} -> Input keyCode true))
-                                             , E.onKeyUp (E.input (\ {keyCode} -> Input keyCode false ))
+                                             , E.onKeyDown  (E.input (\ ke -> Input ke true))
+                                             , E.onKeyUp (E.input (\ ke -> Input ke false ))
                                              , P.tabIndex 0
-                                             , P.height $ pixels $ ceil canvasSize.h
+                                             , P.height $ ceil canvasSize.h
                                              , P.width
-                                               $ pixels
                                                $ ceil canvasSize.w ]]
               render _ = Login.render UpdateLogin SetAuth
-              eval :: Query ~> (ComponentDSL State Query g)
+              eval :: Query ~> ComponentDSL State Query Void (Aff (Effects eff))
               eval (NewGame a) =
                 pure a
-              eval (Input keyCode down a) =do
+              eval (Input ke down a) =do
                 st <- get
                 case do 
                     au <- st.auth 
-                    com <- lookupControls keyCode down
+                    com <- lookupControls (K.code ke) down
                     pure (Tuple au com) of
                   Nothing -> pure a
                   Just (Tuple t com) -> do 
-                       merr <- liftH <<< liftAff $ sendCommand com t
+                       merr <- liftAff $ sendCommand com t
                        pure a
               eval (UpdateLogin l a) = do
                 modify (\st -> st {login = l})
@@ -100,21 +107,21 @@ game = lifecycleComponent {render, eval, initializer: Nothing, finalizer: Just $
               eval (SetAuth a) = do
                 st <- get
                 let t = (AuthToken st.login)
-                set $ st {auth = Just t}
-                sub <- liftH $ liftEff $ initSubscriber t 
+                put $ st {auth = Just t}
+                sub <- liftEff $ initSubscriber t 
                 subscribe (gameMessages sub.messages)
-                liftH <<< liftAff $ sendCommand (Com.Configuration (Com.AddPlayer)) t
+                liftAff $ sendCommand (Com.Configuration (Com.AddPlayer)) t
                 pure a
               eval (NoOp a) = pure a
               eval (UpdateGame g a) = do
-                liftH <<< liftEff $ renderGame canvasSize.w canvasSize.h canvasName g
+                liftEff $ renderGame canvasSize.w canvasSize.h canvasName g
                 pure a
               eval (Close a) = do
                 st <- get
                 case st.auth of
                     Nothing -> pure a
                     Just  t -> do 
-                        liftH <<< liftAff $ sendCommand (Com.Configuration (Com.RemovePlayer)) t
+                        liftAff $ sendCommand (Com.Configuration (Com.RemovePlayer)) t
                         pure a
 
 canvasName :: String
@@ -189,7 +196,7 @@ callback :: forall eff.
 callback sig eff = do 
     runSignal (eff <$> sig)
 
-gameMessages ::  forall g eff. (Monad g, Affable (HalogenEffects(Effects eff)) g) => Signal Action ->  EventSource Query g
+gameMessages ::  forall eff. Signal Action ->  EventSource Query (Aff(Effects eff))
 gameMessages sig = eventSource (callback sig) (\a -> case a of
             Update s -> f $ UpdateGame s
             Nop -> f $ NoOp
@@ -197,7 +204,8 @@ gameMessages sig = eventSource (callback sig) (\a -> case a of
             SubscriberLog s -> f $ NoOp
         )
         where 
-            f x = pure $ action x
+            f :: (SubscribeStatus -> Query SubscribeStatus) -> Maybe (Query SubscribeStatus)
+            f x = Just $ x Listening
 
 sendCommand :: forall eff. GameCommand -> AuthToken -> Aff (ajax :: AJAX | eff) (Maybe String)
 sendCommand s a = do
@@ -207,10 +215,10 @@ sendCommand s a = do
         _ -> Nothing
 
 
-lookupControls :: KeyCode -> Boolean -> Maybe GameCommand
-lookupControls 37.0 d = Just $ (if d then Move else StopMove) Com.Left
-lookupControls 38.0 d = Just $ (if d then Move else StopMove) Com.Up
-lookupControls 39.0 d = Just $ (if d then Move else StopMove) Com.Right
-lookupControls 40.0 d = Just $ (if d then Move else StopMove) Com.Down
+lookupControls :: String -> Boolean -> Maybe GameCommand
+lookupControls "ArrowLeft" d = Just $ (if d then Move else StopMove) Com.Left
+lookupControls "ArrowUp" d = Just $ (if d then Move else StopMove) Com.Up
+lookupControls "ArrowRight" d = Just $ (if d then Move else StopMove) Com.Right
+lookupControls "ArrowDown" d = Just $ (if d then Move else StopMove) Com.Down
 lookupControls _ _ = Nothing
 

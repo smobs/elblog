@@ -12,6 +12,6 @@ import DOM.Event.KeyboardEvent as K
 type State = {auth :: Maybe AuthToken, login :: String}
 
 onSpecificKeyPress :: forall r i. String -> (K.KeyboardEvent -> Maybe i) -> P.IProp (onKeyPress :: K.KeyboardEvent | r) i
-onSpecificKeyPress code = E.onKeyPress    
+onSpecificKeyPress code f = E.onKeyPress (\ke -> if K.code ke == code then f ke else Nothing)  
 
 render update setAuth = H.div_ $ [ H.text "Username", H.input [E.onValueInput (E.input update), onSpecificKeyPress "Enter" (E.input_ setAuth)], H.button [E.onClick (E.input_ setAuth)] [H.text "Login"] ]

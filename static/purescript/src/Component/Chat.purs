@@ -76,7 +76,7 @@ chat = lifecycleComponent spec
                         then []
                         else [ H.input [ P.value cur
                                        , E.onValueInput (E.input UpdateCurrent)
-                                       , E.onKeyPress  ((E.input_ SendMessage))
+                                       , Login.onSpecificKeyPress "Enter" ((E.input_ SendMessage))
                                        ]
                             , H.button [E.onClick (E.input_ SendMessage)] [H.text "Send"]])
                         $ (\(ChatMessage t) -> H.div_ [H.text (t.userName <> ": " <> t.messageBody)]) <$> text

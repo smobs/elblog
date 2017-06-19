@@ -75,8 +75,8 @@ game = lifecycleComponent {initialState: const initial, receiver: const Nothing,
                 pure a
 
 lookupCommand :: String -> Maybe PongCommand
-lookupCommand c | c == "KeyW" = Just $ MovePlayer { player: One, move: Direction Down}
-                | c == "KeyS" = Just $ MovePlayer { player: One, move: Direction Up}
+lookupCommand c | c == "KeyS" = Just $ MovePlayer { player: One, move: Direction Down}
+                | c == "KeyW" = Just $ MovePlayer { player: One, move: Direction Up}
                 | c == "ArrowDown" = Just $ MovePlayer { player: Two, move: Direction Down}
                 | c == "ArrowUp" = Just $ MovePlayer { player: Two, move: Direction Up}
                 | otherwise = Nothing

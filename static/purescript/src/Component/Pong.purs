@@ -20,7 +20,7 @@ import Graphics.Canvas (CANVAS)
 import Halogen (ComponentDSL, ComponentHTML, Component, SubscribeStatus(Listening), action, lifecycleComponent, get, modify, subscribe, eventSource_, EventSource)
 import Pong (sendCommand, PongState(..), DirY(..), Move(..), Player(..), PongCommand(..), renderPong, initialPongState)
 import Prelude
-import Control.Monad.Aff.AVar(AVAR)
+import Control.Monad.Aff.AVar(AVAR) 
 import DOM.Event.KeyboardEvent as K
 
 type State = { pong :: PongState, loop :: Maybe IntervalId}
@@ -75,10 +75,10 @@ game = lifecycleComponent {initialState: const initial, receiver: const Nothing,
                 pure a
 
 lookupCommand :: String -> Maybe PongCommand
-lookupCommand c | c == "a" = Just $ MovePlayer { player: One, move: Direction Down}
-                | c == "z" = Just $ MovePlayer { player: One, move: Direction Up}
-                | c == "j" = Just $ MovePlayer { player: Two, move: Direction Down}
-                | c == "m" = Just $ MovePlayer { player: Two, move: Direction Up}
+lookupCommand c | c == "KeyW" = Just $ MovePlayer { player: One, move: Direction Down}
+                | c == "KeyS" = Just $ MovePlayer { player: One, move: Direction Up}
+                | c == "ArrowDown" = Just $ MovePlayer { player: Two, move: Direction Down}
+                | c == "ArrowUp" = Just $ MovePlayer { player: Two, move: Direction Up}
                 | otherwise = Nothing
 renderGameInfo :: PongState -> ComponentHTML Query 
 renderGameInfo (PongState {score:{one, two} }) = H.div [] [ H.text (show one <> " : " <> show two) 

@@ -21,4 +21,4 @@ onlyForKey :: forall props g ev.
                          -> g (Maybe ev)
 onlyForKey i input  = (\ (ke) -> (if K.code ke == i then id else const Nothing) <$> input ke)
 
-render update setAuth = H.div_ $ [ H.text "Username",  H.input [E.onValueInput (E.input update), E.onKeyPress  (onlyForKey "Enter" (E.input_ setAuth))], H.button [E.onClick (E.input_ setAuth)] [H.text "Login"] ]
+render update setAuth = H.div_ $ [ H.text "Username", H.input [E.onValueInput (E.input update), E.onKeyPress ((E.input_ setAuth))], H.button [E.onClick (E.input_ setAuth)] [H.text "Login"] ]
